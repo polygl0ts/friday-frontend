@@ -6,14 +6,13 @@ RUN npm ci
 
 COPY . .
 
-ARG VITE_RCTF_ORIGIN
-ARG VITE_EXTRAS_ORIGIN
-ENV VITE_RCTF_ORIGIN=${VITE_RCTF_ORIGIN}
-ENV VITE_EXTRAS_ORIGIN=${VITE_EXTRAS_ORIGIN}
-
 RUN npm run build
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
+# Put the config so the frontend can fetch it dynamically
+# (if we bake it in during build time, we can't customize these in ./infra after
+# pulling from ghcr)
+COPY --from=build /app/config.json /usr/share/nginx/html/config.json
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

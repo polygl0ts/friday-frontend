@@ -4,6 +4,7 @@
  * exactly - unlike rctf.ts, nothing here is a guess.
  */
 import { request } from "./client";
+import { extrasOrigin as ORIGIN } from "../config";
 import type {
   AdminStats,
   Deck,
@@ -15,8 +16,6 @@ import type {
   WriteupCard,
   WriteupSort,
 } from "../types";
-
-const ORIGIN = import.meta.env.VITE_EXTRAS_ORIGIN;
 
 // No `getMe`: admin status comes off rCTF's `perms` (see auth/AuthContext).
 // The endpoint still exists server-side as an identity echo for debugging.

@@ -4,6 +4,7 @@
  */
 import { ApiError, request } from "./client";
 import { resolveFileUrl, parseRctfTimestamp, STATIC_FLAG_PROVIDER, staticFlag } from "../utils";
+import { rctfOrigin as ORIGIN } from "../config";
 import type {
   RctfAdminChallenge,
   RctfAdminUser,
@@ -18,7 +19,6 @@ import type {
   RctfSubmissionSortBy,
 } from "../types";
 
-const ORIGIN = import.meta.env.VITE_RCTF_ORIGIN;
 // Some route weren't ported into the v2 so v1 is still necessary.
 // The only one still on v1 are auth and submit
 const V1_BASE = "/api/v1";

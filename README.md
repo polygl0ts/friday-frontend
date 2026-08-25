@@ -9,8 +9,10 @@ It uses two backends, rctf for submission and our custom sauce for writeups etc.
 If you have both backends up and running, bring up the frontend like this:
 ```bash
 npm install
-VITE_RCTF_ORIGIN=http://localhost:8090 VITE_EXTRAS_ORIGIN=http://localhost:8091 npm run dev
+npm run dev
 ```
+
+The frontend loads its backend origins at startup from `./config.json`.
 
 You can also use these:
 ```bash
@@ -19,4 +21,3 @@ npm run build # typecheck + prod build
 npm run test  # vitest
 npm run lint  # oxlint
 ```
-
