@@ -1,5 +1,5 @@
 {
-  // development setup
+  // dev setup
   "rctfOrigin": "http://localhost:8090",
   "extrasOrigin": "http://localhost:8091"
 }
