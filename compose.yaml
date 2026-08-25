@@ -1,0 +1,8 @@
+services:
+  friday-frontend:
+    image: ghcr.io/polygl0ts/friday-frontend:main
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+        - "80:80"
