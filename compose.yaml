@@ -2,6 +2,9 @@ services:
   friday-frontend:
     image: ghcr.io/polygl0ts/friday-frontend:main
     build: .
+    volumes:
+    # copy directly into what nginx serves so our frontend can fetch it
+      - ./config.json:/usr/share/nginx/html/config.json:ro
     restart: unless-stopped
     init: true
     ports:
