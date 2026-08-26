@@ -239,6 +239,34 @@ a:hover {
   color: #fff;
 }
 
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  margin-left: 12px;
+  padding: 4px 10px;
+  flex: none;
+  border: var(--bg);
+  background: var(--bg);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--red-soft);
+}
+
+.theme-toggle .theme-glyph {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
 .header-right {
   display: flex;
   align-items: stretch;
