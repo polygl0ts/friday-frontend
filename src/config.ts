@@ -69,7 +69,7 @@ export function getRuntimeConfig(): RuntimeConfig {
 }
 
 /** Load and validate the server-provided configuration before rendering. */
-export async function loadRuntimeConfig(url = "./config.json"): Promise<RuntimeConfig> {
+export async function loadRuntimeConfig(url = "/config.json"): Promise<RuntimeConfig> {
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Unable to load ${url} (${response.status} ${response.statusText})`);

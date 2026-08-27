@@ -6,18 +6,21 @@ It uses two backends, rctf for submission and our custom sauce for writeups etc.
 
 ## Develop
 
-If you have both backends up and running, bring up the frontend like this:
+Run
 ```bash
-npm install
-npm run dev
+./dev.sh
 ```
+And access http://localhost:5173 (frontend) and http://localhost:8091/docs (backend).
+
+Uses the live deployed rCTF instance.
+
+Assumes that the `./friday-frontend` repo (this repo) is next to `./friday-extras-backend`. If that
+is not the case, set the `BACKEND_DIR` env var to point to the backend directory.
+
+It's live reload on frontend and backend changes.
+
+The script leverages `./vite.config.ts` to override `./config.json` and set up some CORS magic.
+
+## Deployment
 
 The frontend loads its backend origins at startup from `./config.json`.
-
-You can also use these:
-```bash
-npm run dev   # vite dev server
-npm run build # typecheck + prod build
-npm run test  # vitest
-npm run lint  # oxlint
-```
