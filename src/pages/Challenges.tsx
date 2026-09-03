@@ -3,7 +3,8 @@ import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
-import type { ChallengeWithMeta, Tier } from "../types";
+import type { ChallengeWithMeta, Tier, Category } from "../types";
+import { DropDownCategory } from "../components/DropDownCategory";
 
 const TIERS: Tier[] = ["bronze", "silver", "gold"];
 const TIER_META: Record<Tier, string> = {
@@ -15,11 +16,16 @@ const TIER_META: Record<Tier, string> = {
 export function Challenges() {
   const { isLoggedIn } = useAuth();
   const [tier, setTier] = useState<Tier>("bronze");
+  const [category, setCategory] = useState<Category>("all");
   const [detailsChallenge, setDetailsChallenge] =
     useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();
 
-  const filtered = (challengesQuery.data ?? []).filter((c) => c.tier === tier);
+  const filtered = (challengesQuery.data ?? []).filter(
+    (c) =>
+      c.tier === tier &&
+      (category === "all" || c.category.toLowerCase() === category),
+  );
 
   return (
     <div className="page">
@@ -38,16 +44,19 @@ export function Challenges() {
           <div className="page-subtitle">{TIER_META[tier]}</div>
         </div>
         {isLoggedIn && (
-          <div className="tier-tabs">
-            {TIERS.map((t) => (
-              <button
-                key={t}
-                className={`pill${tier === t ? " active" : ""}`}
-                onClick={() => setTier(t)}
-              >
-                {t.toUpperCase()}
-              </button>
-            ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <DropDownCategory value={category} onChange={setCategory} />
+            <div className="tier-tabs">
+              {TIERS.map((t) => (
+                <button
+                  key={t}
+                  className={`pill${tier === t ? " active" : ""}`}
+                  onClick={() => setTier(t)}
+                >
+                  {t.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -65,7 +74,7 @@ export function Challenges() {
         </div>
       )}
       {challengesQuery.data && filtered.length === 0 && (
-        <div className="empty-text">No challenges in this tier yet.</div>
+        <div className="empty-text">No challenges in here yet.</div>
       )}
 
       <div className="grid grid-3">

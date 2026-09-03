@@ -260,6 +260,19 @@ export type Tier = "bronze" | "silver" | "gold";
  *  archived challenge still has a difficulty. */
 export type ArchivedCat = "general" | "Lake25" | "Lake26";
 
+/** Challenge categories supported. */
+export const CATEGORIES = [
+  "rev",
+  "pwn",
+  "web",
+  "crypto",
+  "misc",
+  "all",
+] as const;
+
+/** Derived from CATEGORIES so the two cannot drift apart. */
+export type Category = (typeof CATEGORIES)[number];
+
 export const TAG_OPTIONS = [
   "tier/bronze",
   "tier/silver",
