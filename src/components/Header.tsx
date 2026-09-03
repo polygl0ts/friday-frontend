@@ -8,6 +8,7 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/intro2", label: "INTRO2" },
   { to: "/chall", label: "CHALL" },
   { to: "/writeups", label: "WRITEUPS" },
+  { to: "/archived", label: "ARCHIVED" },
   { to: "/slides", label: "SLIDES" },
   { to: "/scoreboard", label: "SCOREBOARD" },
 ];
@@ -36,23 +37,35 @@ export function Header() {
           </NavLink>
         ))}
         {isAdmin && (
-          <NavLink to="/admin" className={({ isActive }) => `navlink${isActive ? " active" : ""}`}>
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `navlink${isActive ? " active" : ""}`}
+          >
             ADMIN
           </NavLink>
         )}
       </nav>
 
       <div className="header-right">
-        <ThemeToggle/>
+        <ThemeToggle />
         {isLoggedIn ? (
           <>
             <span className="points-pill">{profile?.score ?? 0} PTS</span>
-            <Link className="avatar" to="/profile" title={profile?.name ?? "profile"}>
-              {profile?.avatarUrl && <img className="avatar-img" src={profile.avatarUrl} alt="" />}
+            <Link
+              className="avatar"
+              to="/profile"
+              title={profile?.name ?? "profile"}
+            >
+              {profile?.avatarUrl && (
+                <img className="avatar-img" src={profile.avatarUrl} alt="" />
+              )}
             </Link>
           </>
         ) : (
-          <NavLink to="/login" className={({ isActive }) => `navlink${isActive ? " active" : ""}`}>
+          <NavLink
+            to="/login"
+            className={({ isActive }) => `navlink${isActive ? " active" : ""}`}
+          >
             LOGIN
           </NavLink>
         )}

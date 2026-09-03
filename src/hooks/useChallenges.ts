@@ -8,7 +8,7 @@ import {
 } from "../api/rctf";
 import { useAuth } from "../auth/AuthContext";
 import type { ChallengeWithMeta } from "../types";
-import { INTRO2_TAG, tierFromTags } from "../utils";
+import { INTRO2_TAG, archiveFromTags, tierFromTags } from "../utils";
 
 /**
  * First bloods come from rCTF, not from a companion service.
@@ -81,11 +81,15 @@ export function useChallenges() {
         if ((chall.tags ?? []).includes(INTRO2_TAG)) return [];
 
         const tier = tierFromTags(chall.tags);
-        if (tier === null) {
+        const archived = archiveFromTags(chall.tags);
+        // An archived challenge is kept without a tier - the archive page
+        // groups by `archived`, and the tiered grids drop a null tier anyway.
+        if (tier === null && archived === null) {
           console.warn(
-            `challenge "${chall.id}" has no tier/* tag and is not on the INTRO2 ` +
-              `track, so it cannot be shown in the grid. Add tier/bronze, ` +
-              `tier/silver or tier/gold to it in rCTF.`,
+            `challenge "${chall.id}" has no tier/* or archive/* tag and is not ` +
+              `on the INTRO2 track, so it cannot be shown in any grid. Add ` +
+              `tier/bronze, tier/silver, tier/gold or an archive/* tag to it ` +
+              `in rCTF.`,
           );
           return [];
         }
@@ -98,6 +102,7 @@ export function useChallenges() {
           {
             ...chall,
             tier,
+            archived,
             points_current: chall.points,
             solved: solvedIds.has(chall.id),
             solveCount: chall.solves ?? 0,

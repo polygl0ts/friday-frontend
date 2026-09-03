@@ -3,20 +3,26 @@
  * leaderboard.
  */
 import { ApiError, request } from "./client";
-import { resolveFileUrl, parseRctfTimestamp, STATIC_FLAG_PROVIDER, staticFlag } from "../utils";
+import {
+  resolveFileUrl,
+  parseRctfTimestamp,
+  STATIC_FLAG_PROVIDER,
+  staticFlag,
+} from "../utils";
 import { rctfOrigin as ORIGIN } from "../config";
-import type {
-  RctfAdminChallenge,
-  RctfAdminUser,
-  RctfChallenge,
-  RctfFlagEntry,
-  RctfLeaderboardEntry,
-  RctfLeaderboardPoint,
-  RctfProfile,
-  RctfSubmission,
-  RctfSubmissionKind,
-  RctfSubmissionResult,
-  RctfSubmissionSortBy,
+import {
+  TAG_OPTIONS,
+  type RctfAdminChallenge,
+  type RctfAdminUser,
+  type RctfChallenge,
+  type RctfFlagEntry,
+  type RctfLeaderboardEntry,
+  type RctfLeaderboardPoint,
+  type RctfProfile,
+  type RctfSubmission,
+  type RctfSubmissionKind,
+  type RctfSubmissionResult,
+  type RctfSubmissionSortBy,
 } from "../types";
 
 // Some route weren't ported into the v2 so v1 is still necessary.
@@ -33,7 +39,7 @@ function unwrap<T>(res: unknown): T {
 
 export interface RegisterResult {
   /**
-   * `null` when rCTF emailed a login link instead of creating the team now. 
+   * `null` when rCTF emailed a login link instead of creating the team now.
    * A non-null value means the team exists and this session is authenticated.
    */
   authToken: string | null;
@@ -44,7 +50,10 @@ export interface RegisterResult {
 /**
  * Create a team.
  */
-export async function register(email: string, name: string): Promise<RegisterResult> {
+export async function register(
+  email: string,
+  name: string,
+): Promise<RegisterResult> {
   const res = await request<unknown>(ORIGIN, `${V2_BASE}/auth/register`, {
     method: "POST",
     body: { email, name },
@@ -52,7 +61,10 @@ export async function register(email: string, name: string): Promise<RegisterRes
   });
   // `goodVerifySent` carries no `data` at all, so both fields fall to null.
   const data = unwrap<{ authToken?: string; teamToken?: string }>(res);
-  return { authToken: data?.authToken ?? null, teamToken: data?.teamToken ?? null };
+  return {
+    authToken: data?.authToken ?? null,
+    teamToken: data?.teamToken ?? null,
+  };
 }
 
 export type VerifyKind = "register" | "team" | "update";
@@ -129,7 +141,9 @@ export async function getMyProfile(): Promise<RctfProfile> {
   const profile = unwrap<RctfProfile>(res);
   return {
     ...profile,
-    avatarUrl: profile.avatarUrl ? resolveFileUrl(profile.avatarUrl, ORIGIN) || null : null,
+    avatarUrl: profile.avatarUrl
+      ? resolveFileUrl(profile.avatarUrl, ORIGIN) || null
+      : null,
   };
 }
 
@@ -137,7 +151,9 @@ export async function getMyProfile(): Promise<RctfProfile> {
  * One team's display name, from the public profile route.
  */
 export async function getTeamName(teamId: string): Promise<string> {
-  const res = await request<unknown>(ORIGIN, `${V2_BASE}/users/${teamId}`, { auth: false });
+  const res = await request<unknown>(ORIGIN, `${V2_BASE}/users/${teamId}`, {
+    auth: false,
+  });
   return unwrap<{ name?: string }>(res)?.name ?? "";
 }
 
@@ -212,7 +228,9 @@ export async function listAdminUsers(
     ORIGIN,
     `${V2_BASE}/admin/users?limit=${capped}&offset=${Math.max(offset, 0)}`,
   );
-  const data = unwrap<{ total?: number; users?: Partial<RctfAdminUser>[] }>(res);
+  const data = unwrap<{ total?: number; users?: Partial<RctfAdminUser>[] }>(
+    res,
+  );
   const users = (data?.users ?? []).map((u) => ({
     id: String(u.id ?? ""),
     name: u.name ?? "",
@@ -237,11 +255,14 @@ export async function listAdminUsers(
  * solves, it just stops ranking. The leaderboard expresses that by omission,
  * so `/v2/admin/users` is the only place the state is visible at all.
  */
-export async function setBannedTeam(teamId: string, banned: boolean): Promise<void> {
+export async function setBannedTeam(
+  teamId: string,
+  banned: boolean,
+): Promise<void> {
   const path = `${V2_BASE}/admin/users/${encodeURIComponent(teamId)}`;
   await request<unknown>(ORIGIN, path, {
     method: "PUT",
-    body: { data: { banned }},
+    body: { data: { banned } },
   });
 }
 
@@ -280,7 +301,9 @@ export interface TeamSubmissionsQuery {
 /** rCTF's include/exclude filter shape. An *empty* `include` is not "match
  *  nothing" - the server treats it as no filter at all and answers with every
  *  row, which is why every caller here omits the key instead. */
-function includeFilter<T>(values: T[] | undefined): { include: T[] } | undefined {
+function includeFilter<T>(
+  values: T[] | undefined,
+): { include: T[] } | undefined {
   return values && values.length > 0 ? { include: values } : undefined;
 }
 
@@ -306,9 +329,13 @@ export async function listTeamSubmissions(
   teamId: string,
   query: TeamSubmissionsQuery = {},
 ): Promise<AdminSubmissionsPage> {
-  if (!teamId) throw new Error("A team id is required to read a submission log.");
+  if (!teamId)
+    throw new Error("A team id is required to read a submission log.");
 
-  const limit = Math.min(Math.max(query.limit ?? ADMIN_SUBMISSIONS_MAX_LIMIT, 1), ADMIN_SUBMISSIONS_MAX_LIMIT);
+  const limit = Math.min(
+    Math.max(query.limit ?? ADMIN_SUBMISSIONS_MAX_LIMIT, 1),
+    ADMIN_SUBMISSIONS_MAX_LIMIT,
+  );
   const params = new URLSearchParams({
     limit: String(limit),
     offset: String(Math.max(query.offset ?? 0, 0)),
@@ -320,22 +347,30 @@ export async function listTeamSubmissions(
   const search = query.challengeSearch?.trim();
   if (search) params.set("challengeSearch", search.slice(0, 100));
 
-  const res = await request<unknown>(ORIGIN, `${V2_BASE}/admin/submissions?${params}`, {
-    method: "POST",
-    body: {
-      // Never an empty include - see `includeFilter`. This one is always
-      // present, and it is what keeps the response to this one team.
-      team: { include: [teamId] },
-      result: includeFilter(query.results),
-      kind: includeFilter(query.kinds),
-      createdBefore: query.createdBefore,
-      createdAfter: query.createdAfter,
+  const res = await request<unknown>(
+    ORIGIN,
+    `${V2_BASE}/admin/submissions?${params}`,
+    {
+      method: "POST",
+      body: {
+        // Never an empty include - see `includeFilter`. This one is always
+        // present, and it is what keeps the response to this one team.
+        team: { include: [teamId] },
+        result: includeFilter(query.results),
+        kind: includeFilter(query.kinds),
+        createdBefore: query.createdBefore,
+        createdAfter: query.createdAfter,
+      },
     },
-  });
+  );
 
-  const data = unwrap<{ total?: number; submissions?: Partial<RctfSubmission>[] }>(res);
+  const data = unwrap<{
+    total?: number;
+    submissions?: Partial<RctfSubmission>[];
+  }>(res);
   const submissions = (data?.submissions ?? []).map((s) => {
-    const raw = typeof s.createdAt === "string" ? s.createdAt : String(s.createdAt ?? "");
+    const raw =
+      typeof s.createdAt === "string" ? s.createdAt : String(s.createdAt ?? "");
     return {
       id: String(s.id ?? ""),
       kind: (s.kind ?? "flag") as RctfSubmissionKind,
@@ -347,7 +382,9 @@ export async function listTeamSubmissions(
       userDivision: s.userDivision ?? "",
       // Same resolution the leaderboard and the team panel do: rCTF's local
       // upload provider answers with a path relative to *rCTF's* origin.
-      userAvatarUrl: s.userAvatarUrl ? resolveFileUrl(s.userAvatarUrl, ORIGIN) || null : null,
+      userAvatarUrl: s.userAvatarUrl
+        ? resolveFileUrl(s.userAvatarUrl, ORIGIN) || null
+        : null,
       userCountryCode: s.userCountryCode ?? null,
       userStatusText: s.userStatusText ?? null,
       userBanned: s.userBanned ?? false,
@@ -390,13 +427,20 @@ export interface RctfDivision {
  * would silently drop every division that has no teams in it yet.
  */
 export async function listDivisions(): Promise<RctfDivision[]> {
-  const res = await request<unknown>(ORIGIN, `${V2_BASE}/integrations/client/config`, {
-    auth: false,
-  });
+  const res = await request<unknown>(
+    ORIGIN,
+    `${V2_BASE}/integrations/client/config`,
+    {
+      auth: false,
+    },
+  );
   const data = unwrap<{ divisions?: Record<string, string> }>(res);
   // Config order, not sorted: `divisions` is an ordered mapping in the YAML, and
   // an event's own order (open, epfl, alumni...) is more useful than alphabet.
-  return Object.entries(data?.divisions ?? {}).map(([id, name]) => ({ id, name: name || id }));
+  return Object.entries(data?.divisions ?? {}).map(([id, name]) => ({
+    id,
+    name: name || id,
+  }));
 }
 
 /**
@@ -413,8 +457,10 @@ export async function listDivisions(): Promise<RctfDivision[]> {
  * inferred - and note that the player's own route, `PATCH /v2/users/me`,
  * *does* reject the same value with `badDivisionNotAllowed`. Only this is open.
  */
-export async function setDivisionTeam(teamId: string, division: string): Promise<void> {
-
+export async function setDivisionTeam(
+  teamId: string,
+  division: string,
+): Promise<void> {
   const path = `${V2_BASE}/admin/users/${encodeURIComponent(teamId)}`;
   await request<unknown>(ORIGIN, path, {
     method: "PUT",
@@ -425,11 +471,14 @@ export async function setDivisionTeam(teamId: string, division: string): Promise
 /**
  * Show or hide one challenge.
  *
- * GET to the path is used a gate to prevent a PUT for unexisting challenge id. 
+ * GET to the path is used a gate to prevent a PUT for unexisting challenge id.
  * Present because a PUT over an unexisting challenge id will create a new challenge
  * with default parameters.
  */
-export async function setChallengeHidden(challengeId: string, hidden: boolean): Promise<void> {
+export async function setChallengeHidden(
+  challengeId: string,
+  hidden: boolean,
+): Promise<void> {
   const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}`;
   await request<unknown>(ORIGIN, path);
   await request<unknown>(ORIGIN, path, {
@@ -441,7 +490,10 @@ export async function setChallengeHidden(challengeId: string, hidden: boolean): 
 /**
  * Set a new release time for the given challenge.
  */
-export async function setReleaseTime(challengeId: string, releaseTime: number): Promise<void> {
+export async function setReleaseTime(
+  challengeId: string,
+  releaseTime: number,
+): Promise<void> {
   const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}`;
   await request<unknown>(ORIGIN, path);
   await request<unknown>(ORIGIN, path, {
@@ -453,44 +505,52 @@ export async function setReleaseTime(challengeId: string, releaseTime: number): 
 /**
  * Append one static flag to a challenge, keeping the ones already there.
  */
-export async function addFlag(challengeId: string, oldflags: RctfFlagEntry[], newflag: string): Promise<RctfFlagEntry[]>{
-
+export async function addFlag(
+  challengeId: string,
+  oldflags: RctfFlagEntry[],
+  newflag: string,
+): Promise<RctfFlagEntry[]> {
   const flag = newflag.trim();
   if (!flag) throw new Error("New flag cannot be empty.");
   if (oldflags.some((entry) => staticFlag(entry) === flag))
-    throw new Error("This flag already exists for this challenge."); 
-  
+    throw new Error("This flag already exists for this challenge.");
+
   const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}`;
   await request<unknown>(ORIGIN, path);
-  
-  const flags = [...oldflags, { provider: STATIC_FLAG_PROVIDER, config: { flag } }];
+
+  const flags = [
+    ...oldflags,
+    { provider: STATIC_FLAG_PROVIDER, config: { flag } },
+  ];
 
   await request<unknown>(ORIGIN, path, {
     method: "PUT",
-    body: { data: { flags }},
+    body: { data: { flags } },
   });
 
   return flags;
 }
 
 /**
- * Delete the given flag from the give challenge if possible. 
+ * Delete the given flag from the give challenge if possible.
  * Safeguarded for existence and based flag.
  */
-export async function deleteFlag(challengeId: string, oldflags: RctfFlagEntry[], removedFlag: RctfFlagEntry): Promise<RctfFlagEntry[]> {
-
+export async function deleteFlag(
+  challengeId: string,
+  oldflags: RctfFlagEntry[],
+  removedFlag: RctfFlagEntry,
+): Promise<RctfFlagEntry[]> {
   const flag = staticFlag(removedFlag);
-  if ( flag === null)
-      throw new Error("Flag entry to remove cannot be null.")
+  if (flag === null) throw new Error("Flag entry to remove cannot be null.");
 
   const flagTrimed = flag.trim();
   if (!flagTrimed) throw new Error("Flag to remove cannot be empty.");
 
-  const pos = oldflags.map((e) => staticFlag(e) === flag ? 1 : 0)
+  const pos = oldflags.map((e) => (staticFlag(e) === flag ? 1 : 0));
   if (!pos.includes(1))
     throw new Error("This flag does not exist for this challenge.");
   if (pos.indexOf(1) === 0)
-      throw new Error("This is the base flag, it cannot be removed.")
+    throw new Error("This is the base flag, it cannot be removed.");
 
   const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}`;
   await request<unknown>(ORIGIN, path);
@@ -508,11 +568,14 @@ export async function deleteFlag(challengeId: string, oldflags: RctfFlagEntry[],
 /**
  * Change challenge tag to the given one, completely overriding the pre-existing one.
  */
-export async function changeChallengeTag(challengeId: string, tag: string): Promise<string[]> {
-
-  const allowedTags = ["tier/bronze", "tier/silver", "tier/gold"];
-  if (!allowedTags.some((t) => t === tag))
-      throw new Error("This tier is not supported, you cannot move this challenge.")
+export async function changeChallengeTag(
+  challengeId: string,
+  tag: string,
+): Promise<string[]> {
+  if (!TAG_OPTIONS.some((t) => t === tag))
+    throw new Error(
+      "This tier is not supported, you cannot move this challenge.",
+    );
 
   const tags = [tag];
 
@@ -552,7 +615,9 @@ interface RawSolve {
   bloodIndex?: number | null;
 }
 
-export async function getChallengeSolves(challengeId: string): Promise<ChallengeSolve[]> {
+export async function getChallengeSolves(
+  challengeId: string,
+): Promise<ChallengeSolve[]> {
   const res = await request<unknown>(
     ORIGIN,
     `${V2_BASE}/challs/${challengeId}/solves?limit=100&offset=0`,
@@ -581,12 +646,19 @@ export interface FlagResult {
  * `badFlag`, an already-solved challenge is 409 `badAlreadySolvedChallenge`,
  * and rate-limiting is 429.
  */
-export async function submitFlag(challengeId: string, flag: string): Promise<FlagResult> {
+export async function submitFlag(
+  challengeId: string,
+  flag: string,
+): Promise<FlagResult> {
   try {
-    const res = await request<unknown>(ORIGIN, `${V1_BASE}/challs/${challengeId}/submit`, {
-      method: "POST",
-      body: { flag },
-    });
+    const res = await request<unknown>(
+      ORIGIN,
+      `${V1_BASE}/challs/${challengeId}/submit`,
+      {
+        method: "POST",
+        body: { flag },
+      },
+    );
     const data = unwrap<{ correct?: boolean }>(res);
     const correct = data?.correct ?? true; // real rCTF: HTTP 200 == correct
     return {
@@ -596,7 +668,11 @@ export async function submitFlag(challengeId: string, flag: string): Promise<Fla
     };
   } catch (e) {
     if (e instanceof ApiError) {
-      return { correct: false, alreadySolved: e.status === 409, message: e.message };
+      return {
+        correct: false,
+        alreadySolved: e.status === 409,
+        message: e.message,
+      };
     }
     throw e;
   }
@@ -627,14 +703,20 @@ export interface Leaderboard {
  * rather than leaving the scoreboard to work out which origin a row's URL
  * belongs to. Absent and empty both become null: one value for "no picture".
  */
-function withResolvedAvatars(entries: RctfLeaderboardEntry[]): RctfLeaderboardEntry[] {
+function withResolvedAvatars(
+  entries: RctfLeaderboardEntry[],
+): RctfLeaderboardEntry[] {
   return entries.map((entry) => ({
     ...entry,
-    avatarUrl: entry.avatarUrl ? resolveFileUrl(entry.avatarUrl, ORIGIN) || null : null,
+    avatarUrl: entry.avatarUrl
+      ? resolveFileUrl(entry.avatarUrl, ORIGIN) || null
+      : null,
   }));
 }
 
-export async function getLeaderboard(limit = LEADERBOARD_MAX_LIMIT): Promise<Leaderboard> {
+export async function getLeaderboard(
+  limit = LEADERBOARD_MAX_LIMIT,
+): Promise<Leaderboard> {
   const capped = Math.min(Math.max(limit, 1), LEADERBOARD_MAX_LIMIT);
   const res = await request<unknown>(
     ORIGIN,
@@ -642,13 +724,17 @@ export async function getLeaderboard(limit = LEADERBOARD_MAX_LIMIT): Promise<Lea
     { auth: false },
   );
   const data = unwrap<
-    { leaderboard?: RctfLeaderboardEntry[]; total?: number } | RctfLeaderboardEntry[]
+    | { leaderboard?: RctfLeaderboardEntry[]; total?: number }
+    | RctfLeaderboardEntry[]
   >(res);
   if (Array.isArray(data)) {
     return { total: data.length, entries: withResolvedAvatars(data) };
   }
   const entries = data.leaderboard ?? [];
-  return { total: data.total ?? entries.length, entries: withResolvedAvatars(entries) };
+  return {
+    total: data.total ?? entries.length,
+    entries: withResolvedAvatars(entries),
+  };
 }
 
 export interface LeaderboardWithGraph extends Leaderboard {
@@ -717,16 +803,24 @@ interface RawLeaderboardChallenge {
 /**
  * Per-challenge metadata for the scoreboard's solve matrix, keyed by id.
  */
-export async function getLeaderboardChallenges(): Promise<LeaderboardChallenge[]> {
-  const res = await request<unknown>(ORIGIN, `${V2_BASE}/leaderboard/challs`, { auth: false });
-  const data = unwrap<{ challenges?: Record<string, RawLeaderboardChallenge> }>(res);
+export async function getLeaderboardChallenges(): Promise<
+  LeaderboardChallenge[]
+> {
+  const res = await request<unknown>(ORIGIN, `${V2_BASE}/leaderboard/challs`, {
+    auth: false,
+  });
+  const data = unwrap<{ challenges?: Record<string, RawLeaderboardChallenge> }>(
+    res,
+  );
   return Object.entries(data?.challenges ?? {}).map(([id, meta]) => ({
     id,
     name: meta.name ?? id,
     category: meta.category ?? "other",
     points: meta.points ?? 0,
     solves: meta.solves ?? 0,
-    firstSolvers: (meta.firstSolvers ?? []).map((s) => String(s?.id ?? "")).filter(Boolean),
+    firstSolvers: (meta.firstSolvers ?? [])
+      .map((s) => String(s?.id ?? ""))
+      .filter(Boolean),
   }));
 }
 
@@ -753,7 +847,9 @@ export async function setAvatar(file: File): Promise<string> {
   });
   const url = unwrap<{ url: string | null }>(res)?.url ?? null;
   if (!url) {
-    throw new Error("Failed to upload image, please try again or chose another one.");
+    throw new Error(
+      "Failed to upload image, please try again or chose another one.",
+    );
   }
   return resolveFileUrl(url, ORIGIN) || url;
 }
@@ -764,9 +860,13 @@ export async function setAvatar(file: File): Promise<string> {
  * confirmation message.
  */
 export async function deleteAvatar(): Promise<string> {
-  const res = await request<{ message?: string }>(ORIGIN, `${V2_BASE}/users/me/avatar`, {
-    method: "PATCH",
-    body: new FormData(),
-  });
+  const res = await request<{ message?: string }>(
+    ORIGIN,
+    `${V2_BASE}/users/me/avatar`,
+    {
+      method: "PATCH",
+      body: new FormData(),
+    },
+  );
   return res?.message ?? "";
 }

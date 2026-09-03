@@ -5,6 +5,7 @@ import { RequireAdmin } from "./components/RequireAdmin";
 import { Admin } from "./pages/Admin";
 import { AdminChallenges } from "./pages/AdminChallenges";
 import { AdminTeams } from "./pages/AdminTeams";
+import { ArchivedChalls } from "./pages/ArchivedChalls";
 import { Challenges } from "./pages/Challenges";
 import { Home } from "./pages/Home";
 import { Intro2 } from "./pages/Intro2";
@@ -35,6 +36,7 @@ function App() {
         <Route path="/intro2" element={<Intro2 />} />
         <Route path="/chall" element={<Challenges />} />
         <Route path="/writeups" element={<Writeups />} />
+        <Route path="/archived" element={<ArchivedChalls />} />
         <Route path="/slides" element={<Slides />} />
         <Route path="/scoreboard" element={<Scoreboard />} />
         <Route path="/login" element={<Login />} />

@@ -123,7 +123,8 @@ export type RctfSubmissionResult =
   | "bad_instancer_state";
 
 /** The columns `/v2/admin/submissions` will sort on. Anything else is a 400. */
-export type RctfSubmissionSortBy = "createdAt" | "challenge" | "team" | "ip" | "kind" | "result";
+export type RctfSubmissionSortBy =
+  "createdAt" | "challenge" | "team" | "ip" | "kind" | "result";
 
 /**
  * One row of `/v2/admin/submissions` - rCTF's submission log, and the only
@@ -255,8 +256,23 @@ export interface RctfLeaderboardPoint {
 
 export type Tier = "bronze" | "silver" | "gold";
 
+/** Which archive a challenge belongs to. A separate axis from `Tier`: an
+ *  archived challenge still has a difficulty. */
+export type ArchivedCat = "general" | "Lake25" | "Lake26";
+
+export const TAG_OPTIONS = [
+  "tier/bronze",
+  "tier/silver",
+  "tier/gold",
+  "archived/general",
+  "archived/Lake25",
+  "archived/Lake26",
+] as const;
+
+/** Tier or archived cna be null, need to be foolguarded */
 export interface ChallengeWithMeta extends RctfChallenge {
-  tier: Tier;
+  tier: Tier | null;
+  archived: ArchivedCat | null;
   points_current: number;
   solved: boolean;
   solveCount: number;

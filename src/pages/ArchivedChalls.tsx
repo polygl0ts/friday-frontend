@@ -3,23 +3,25 @@ import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
-import type { ChallengeWithMeta, Tier } from "../types";
+import type { ChallengeWithMeta, ArchivedCat } from "../types";
 
-const TIERS: Tier[] = ["bronze", "silver", "gold"];
-const TIER_META: Record<Tier, string> = {
-  bronze: "BRONZE TIER · START HERE",
-  silver: "SILVER TIER · SOME EXPERIENCE ASSUMED",
-  gold: "GOLD TIER · THE HARD ONES",
+const TIERS: ArchivedCat[] = ["general", "Lake25", "Lake26"];
+const TIER_META: Record<ArchivedCat, string> = {
+  general: "GENERAL",
+  Lake25: "Lake 2025",
+  Lake26: "Lake 2026",
 };
 
-export function Challenges() {
+export function ArchivedChalls() {
   const { isLoggedIn } = useAuth();
-  const [tier, setTier] = useState<Tier>("bronze");
+  const [tier, setTier] = useState<ArchivedCat>("general");
   const [detailsChallenge, setDetailsChallenge] =
     useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();
 
-  const filtered = (challengesQuery.data ?? []).filter((c) => c.tier === tier);
+  const filtered = (challengesQuery.data ?? []).filter(
+    (c) => c.archived === tier,
+  );
 
   return (
     <div className="page">
@@ -65,7 +67,7 @@ export function Challenges() {
         </div>
       )}
       {challengesQuery.data && filtered.length === 0 && (
-        <div className="empty-text">No challenges in this tier yet.</div>
+        <div className="empty-text">No challenges in here yet. </div>
       )}
 
       <div className="grid grid-3">

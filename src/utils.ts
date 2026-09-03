@@ -1,4 +1,4 @@
-import type { RctfFlagEntry, Tier } from "./types";
+import type { ArchivedCat, RctfFlagEntry, Tier } from "./types";
 
 // Matches INTRO2_TAG in the backend's app/routers/intro2.py - challenges
 // tagged this way live on the dedicated INTRO2 page
@@ -70,6 +70,30 @@ export function tierFromTags(tags: string[] | null | undefined): Tier | null {
   return null;
 }
 
+const ARCHIVE_TAG_PREFIX = "archived/";
+
+/** archived tag suffix */
+const ARCHIVE_CATS: Record<string, ArchivedCat> = {
+  general: "general",
+  lake25: "Lake25",
+  lake26: "Lake26",
+};
+
+/**
+ * Which archive a challenge belongs to, read from its rCTF tags and nothing
+ * else.
+ */
+export function archiveFromTags(
+  tags: string[] | null | undefined,
+): ArchivedCat | null {
+  for (const tag of tags ?? []) {
+    if (!tag.startsWith(ARCHIVE_TAG_PREFIX)) continue;
+    const candidate = tag.slice(ARCHIVE_TAG_PREFIX.length).toLowerCase();
+    if (candidate in ARCHIVE_CATS) return ARCHIVE_CATS[candidate];
+  }
+  return null;
+}
+
 /**
  * rCTF's static flag provider - the only one that stores a literal answer.
  * Everything else (`flags/dynamic`, and the instancer-backed providers)
@@ -123,9 +147,14 @@ export function formatTimestamp(
  * space instead of the `T` and a two-digit zone offset. Checked against rCTF
  * v2.1.2, not inferred.
  */
-export function parseRctfTimestamp(value: string | null | undefined): number | null {
+export function parseRctfTimestamp(
+  value: string | null | undefined,
+): number | null {
   if (typeof value !== "string" || !value.trim()) return null;
-  const normalized = value.trim().replace(" ", "T").replace(/([+-]\d{2})$/, "$1:00");
+  const normalized = value
+    .trim()
+    .replace(" ", "T")
+    .replace(/([+-]\d{2})$/, "$1:00");
   const ms = new Date(normalized).getTime();
   return Number.isNaN(ms) ? null : ms;
 }
@@ -203,7 +232,10 @@ export function formatFileSize(bytes: number | null): string | null {
  * image, and a type of "image/svg+xml" or a renamed binary reaches it either
  * way.
  */
-export function avatarRejectionReason(file: File, maxBytes: number): string | null {
+export function avatarRejectionReason(
+  file: File,
+  maxBytes: number,
+): string | null {
   if (!file.type.startsWith("image/")) return "That file isn't an image.";
   if (file.size > maxBytes) {
     return `That image is ${formatFileSize(file.size)}. The limit is ${formatFileSize(maxBytes)}.`;
@@ -219,7 +251,10 @@ export const SOLUTION_MARKER = ":::solution";
  * Editor-preview split, mirroring the server's rule (marker at column 0,
  * outside a code fence).
  */
-export function splitWriteup(bodyMd: string): { intro: string; solution: string | null } {
+export function splitWriteup(bodyMd: string): {
+  intro: string;
+  solution: string | null;
+} {
   const lines = bodyMd.split("\n");
   let fence: string | null = null;
 
@@ -237,7 +272,10 @@ export function splitWriteup(bodyMd: string): { intro: string; solution: string 
     if (lines[i].replace(/\s+$/, "") === SOLUTION_MARKER) {
       return {
         intro: lines.slice(0, i).join("\n").trim(),
-        solution: lines.slice(i + 1).join("\n").trim(),
+        solution: lines
+          .slice(i + 1)
+          .join("\n")
+          .trim(),
       };
     }
   }

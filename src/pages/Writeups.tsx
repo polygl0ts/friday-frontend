@@ -42,7 +42,7 @@ export function Writeups() {
       .flat()
       .find((c) => c.id === id);
     const chall = challengesQuery.data.find((c) => c.id === card?.challenge_id);
-    if (chall) {
+    if (chall?.tier) {
       setTier(chall.tier);
       setOpen(chall);
     }
