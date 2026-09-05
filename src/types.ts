@@ -254,12 +254,17 @@ export interface RctfLeaderboardPoint {
 
 // ---------- derived / frontend-only ----------
 
-export type Tier = "bronze" | "silver" | "gold";
+export const TIERS = ["bronze", "silver", "gold"] as const;
+export const ARCHIVED_CATS = ["general", "Lake25", "Lake26"] as const;
 
-/** Which archive a challenge belongs to. A separate axis from `Tier`: an
- *  archived challenge still has a difficulty. */
-export type ArchivedCat = "general" | "Lake25" | "Lake26";
+export type Tier = (typeof TIERS)[number];
+export type ArchivedCat = (typeof ARCHIVED_CATS)[number];
+export type TagOption = `tier/${Tier}` | `archived/${ArchivedCat}`;
 
+export const TAG_OPTIONS: readonly TagOption[] = [
+  ...TIERS.map((t) => `tier/${t}` as const),
+  ...ARCHIVED_CATS.map((c) => `archived/${c}` as const),
+];
 /** Challenge categories supported. */
 export const CATEGORIES = [
   "rev",
@@ -269,18 +274,7 @@ export const CATEGORIES = [
   "misc",
   "all",
 ] as const;
-
-/** Derived from CATEGORIES so the two cannot drift apart. */
 export type Category = (typeof CATEGORIES)[number];
-
-export const TAG_OPTIONS = [
-  "tier/bronze",
-  "tier/silver",
-  "tier/gold",
-  "archived/general",
-  "archived/Lake25",
-  "archived/Lake26",
-] as const;
 
 /** Tier or archived cna be null, need to be foolguarded */
 export interface ChallengeWithMeta extends RctfChallenge {

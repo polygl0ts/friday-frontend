@@ -4,14 +4,18 @@ import { ChallengeModal } from "../components/ChallengeModal";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
-import type { ArchivedCat, Category, ChallengeWithMeta } from "../types";
+import {
+  ARCHIVED_CATS,
+  type ArchivedCat,
+  type Category,
+  type ChallengeWithMeta,
+} from "../types";
 import { groupByCategory } from "../utils";
 
-const TIERS: ArchivedCat[] = ["general", "Lake25", "Lake26"];
 const TIER_META: Record<ArchivedCat, string> = {
   general: "GENERAL",
-  Lake25: "Lake 2025",
-  Lake26: "Lake 2026",
+  Lake25: "Lake 2024-25",
+  Lake26: "Lake 2025-26",
 };
 
 /** Archived challenges display, using same logic as tier challenges.
@@ -53,13 +57,13 @@ export function ArchivedChalls() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <DropDownCategory value={category} onChange={setCategory} />
             <div className="tier-tabs">
-              {TIERS.map((t) => (
+              {ARCHIVED_CATS.map((t) => (
                 <button
                   key={t}
                   className={`pill${archivedCategory === t ? " active" : ""}`}
                   onClick={() => setTier(t)}
                 >
-                  {t.toUpperCase()}
+                  {TIER_META[t]}
                 </button>
               ))}
             </div>
