@@ -19,7 +19,7 @@ const TIER_META: Record<ArchivedCat, string> = {
  */
 export function ArchivedChalls() {
   const { isLoggedIn } = useAuth();
-  const [tier, setTier] = useState<ArchivedCat>("general");
+  const [archivedCategory, setTier] = useState<ArchivedCat>("general");
   const [category, setCategory] = useState<Category>("all");
   const [detailsChallenge, setDetailsChallenge] =
     useState<ChallengeWithMeta | null>(null);
@@ -28,7 +28,7 @@ export function ArchivedChalls() {
   const groups = groupByCategory(
     (challengesQuery.data ?? []).filter(
       (c) =>
-        c.category === tier &&
+        c.archived === archivedCategory &&
         (category === "all" || c.category.toLowerCase() === category),
     ),
   );
@@ -47,7 +47,7 @@ export function ArchivedChalls() {
       >
         <div>
           <div className="page-title">CHALLENGES</div>
-          <div className="page-subtitle">{TIER_META[tier]}</div>
+          <div className="page-subtitle">{TIER_META[archivedCategory]}</div>
         </div>
         {isLoggedIn && (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -56,7 +56,7 @@ export function ArchivedChalls() {
               {TIERS.map((t) => (
                 <button
                   key={t}
-                  className={`pill${tier === t ? " active" : ""}`}
+                  className={`pill${archivedCategory === t ? " active" : ""}`}
                   onClick={() => setTier(t)}
                 >
                   {t.toUpperCase()}
