@@ -5,6 +5,7 @@ import { DropDownCategory } from "../components/DropDownCategory";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ArchivedCat, Category, ChallengeWithMeta } from "../types";
+import { groupByCategory } from "../utils";
 
 const TIERS: ArchivedCat[] = ["general", "Lake25", "Lake26"];
 const TIER_META: Record<ArchivedCat, string> = {
@@ -24,13 +25,12 @@ export function ArchivedChalls() {
     useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();
 
-  // "all" is the no-filter option, not a category rCTF reports. Compared
-  // case-insensitively: rCTF's `category` is a free-form string, so its casing
-  // is whatever the challenge author typed.
-  const filtered = (challengesQuery.data ?? []).filter(
-    (c) =>
-      c.archived === tier &&
-      (category === "all" || c.category.toLowerCase() === category),
+  const groups = groupByCategory(
+    (challengesQuery.data ?? []).filter(
+      (c) =>
+        c.category === tier &&
+        (category === "all" || c.category.toLowerCase() === category),
+    ),
   );
 
   return (
@@ -50,9 +50,6 @@ export function ArchivedChalls() {
           <div className="page-subtitle">{TIER_META[tier]}</div>
         </div>
         {isLoggedIn && (
-          // One right-hand group, so the category select sits directly beside
-          // the first archive pill rather than being spread out by the
-          // space-between on the row above.
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <DropDownCategory value={category} onChange={setCategory} />
             <div className="tier-tabs">
@@ -82,19 +79,30 @@ export function ArchivedChalls() {
           {(challengesQuery.error as Error).message}
         </div>
       )}
-      {challengesQuery.data && filtered.length === 0 && (
+      {challengesQuery.data && groups.length === 0 && (
         <div className="empty-text">No challenges in here yet. </div>
       )}
-
-      <div className="grid grid-3">
-        {filtered.map((chall) => (
-          <ChallengeCard
-            key={chall.id}
-            chall={chall}
-            onOpenDetails={() => setDetailsChallenge(chall)}
-          />
-        ))}
-      </div>
+      {groups.map((group, index) => (
+        <div
+          key={group.category}
+          className={`category-section${index > 0 ? " category-section-split" : ""}`}
+        >
+          <div className="category-heading">
+            <span className="category-heading-name">
+              {group.category.toUpperCase()}
+            </span>
+          </div>
+          <div className="grid grid-3">
+            {group.challenges.map((chall) => (
+              <ChallengeCard
+                key={chall.id}
+                chall={chall}
+                onOpenDetails={() => setDetailsChallenge(chall)}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
 
       {detailsChallenge && (
         <ChallengeModal

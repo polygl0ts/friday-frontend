@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta, Tier, Category } from "../types";
 import { DropDownCategory } from "../components/DropDownCategory";
+import { groupByCategory } from "../utils";
 
 const TIERS: Tier[] = ["bronze", "silver", "gold"];
 const TIER_META: Record<Tier, string> = {
@@ -21,10 +22,12 @@ export function Challenges() {
     useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();
 
-  const filtered = (challengesQuery.data ?? []).filter(
-    (c) =>
-      c.tier === tier &&
-      (category === "all" || c.category.toLowerCase() === category),
+  const groups = groupByCategory(
+    (challengesQuery.data ?? []).filter(
+      (c) =>
+        c.tier === tier &&
+        (category === "all" || c.category.toLowerCase() === category),
+    ),
   );
 
   return (
@@ -73,19 +76,31 @@ export function Challenges() {
           {(challengesQuery.error as Error).message}
         </div>
       )}
-      {challengesQuery.data && filtered.length === 0 && (
+      {challengesQuery.data && groups.length === 0 && (
         <div className="empty-text">No challenges in here yet.</div>
       )}
 
-      <div className="grid grid-3">
-        {filtered.map((chall) => (
-          <ChallengeCard
-            key={chall.id}
-            chall={chall}
-            onOpenDetails={() => setDetailsChallenge(chall)}
-          />
-        ))}
-      </div>
+      {groups.map((group, index) => (
+        <div
+          key={group.category}
+          className={`category-section${index > 0 ? " category-section-split" : ""}`}
+        >
+          <div className="category-heading">
+            <span className="category-heading-name">
+              {group.category.toUpperCase()}
+            </span>
+          </div>
+          <div className="grid grid-3">
+            {group.challenges.map((chall) => (
+              <ChallengeCard
+                key={chall.id}
+                chall={chall}
+                onOpenDetails={() => setDetailsChallenge(chall)}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
 
       {detailsChallenge && (
         <ChallengeModal

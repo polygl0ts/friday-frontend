@@ -559,6 +559,30 @@ a:hover {
   }
 }
 
+/* One challenge grid per category, separated by a rule when more than one
+   category is on screen. */
+.category-section + .category-section-split {
+  border-top: 3px solid var(--border);
+  margin-top: 34px;
+  padding-top: 30px;
+}
+
+.category-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.category-heading-name {
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-bright);
+}
+
 .card {
   border: 3px solid var(--border);
   padding: 18px;

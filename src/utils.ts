@@ -1,4 +1,10 @@
-import type { ArchivedCat, RctfFlagEntry, Tier } from "./types";
+import {
+  CATEGORIES,
+  type ArchivedCat,
+  type ChallengeWithMeta,
+  type RctfFlagEntry,
+  type Tier,
+} from "./types";
 
 // Matches INTRO2_TAG in the backend's app/routers/intro2.py - challenges
 // tagged this way live on the dedicated INTRO2 page
@@ -57,6 +63,35 @@ export function permissionNames(perms: number | null | undefined): string[] {
 
 const TIER_TAG_PREFIX = "tier/";
 const TIERS: readonly Tier[] = ["bronze", "silver", "gold"];
+
+/** The categories a challenge can be grouped under
+ * (i.e only the allowed categories).
+ */
+const KNOWN_CATEGORIES: ReadonlySet<string> = new Set(
+  CATEGORIES.filter((c) => c !== "all"),
+);
+
+/**
+ * Group the given challenges by categories. Categories are the one
+ * defined by `CATEGORIES`.
+ */
+export function groupByCategory(
+  challenges: ChallengeWithMeta[],
+): { category: string; challenges: ChallengeWithMeta[] }[] {
+  const groups = new Map<string, ChallengeWithMeta[]>();
+  for (const chall of challenges) {
+    const category = chall.category.toLowerCase();
+    if (!KNOWN_CATEGORIES.has(category)) continue;
+    const group = groups.get(category);
+    if (group) group.push(chall);
+    else groups.set(category, [chall]);
+  }
+
+  return [...groups.keys()].map((category) => ({
+    category,
+    challenges: groups.get(category)!,
+  }));
+}
 
 /**
  * A challenge's tier, read from its rCTF tags and nothing else.
