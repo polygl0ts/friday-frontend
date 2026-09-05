@@ -5,6 +5,7 @@ import {
   isAdminPerms,
   formatTimestamp,
   isSafeUrl,
+  orderIntro2Tracks,
   parseRctfTimestamp,
   resolveFileUrl,
   staticFlag,
@@ -284,5 +285,26 @@ describe("canWriteChalls", () => {
     // full admin included, read as not-an-admin and the panel became
     // unreachable. Any implementation that ANDs the two masks fails here.
     expect(isAdminPerms(FULL_ADMIN) && canWriteChalls(FULL_ADMIN)).toBe(true);
+  });
+});
+
+describe("orderIntro2Tracks", () => {
+  const t = (category: string) => ({ category, steps: [] });
+
+  it("puts the tracks in the site's category order, not the API's", () => {
+    // What the backend sends: grouped by category, sorted alphabetically.
+    const ordered = orderIntro2Tracks([t("web"), t("crypto"), t("misc"), t("pwn"), t("rev")]);
+    expect(ordered.map((x) => x.category)).toEqual(["rev", "pwn", "web", "crypto", "misc"]);
+  });
+
+  it("keeps a category this build doesn't know, sorted after the known ones", () => {
+    const ordered = orderIntro2Tracks([t("forensics"), t("web"), t("blockchain")]);
+    expect(ordered.map((x) => x.category)).toEqual(["web", "blockchain", "forensics"]);
+  });
+
+  it("does not mutate the array it is given", () => {
+    const tracks = [t("web"), t("rev")];
+    orderIntro2Tracks(tracks);
+    expect(tracks.map((x) => x.category)).toEqual(["web", "rev"]);
   });
 });

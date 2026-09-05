@@ -2,12 +2,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Intro2 } from "./Intro2";
-import type { Intro2Step } from "../types";
+import type { Intro2Step, Intro2Track } from "../types";
 
-const getIntro2Track = vi.fn<() => Promise<Intro2Step[]>>();
+const getIntro2Tracks = vi.fn<() => Promise<Intro2Track[]>>();
 
 vi.mock("../api/extras", () => ({
-  getIntro2Track: () => getIntro2Track(),
+  getIntro2Tracks: () => getIntro2Tracks(),
 }));
 vi.mock("../api/rctf", () => ({
   challengeFileUrl: (url: string) => `https://rctf.example${url}`,
@@ -25,10 +25,14 @@ function step(over: Partial<Intro2Step> = {}): Intro2Step {
     title: "Your First Flag",
     description: "Find the flag format and submit it.",
     status: "in_progress",
-    category: "intro",
+    category: "web",
     files: [],
     ...over,
   };
+}
+
+function track(category: string, steps: Intro2Step[]): Intro2Track {
+  return { category, steps };
 }
 
 function renderPage() {
@@ -41,12 +45,12 @@ function renderPage() {
 }
 
 beforeEach(() => {
-  getIntro2Track.mockReset();
+  getIntro2Tracks.mockReset();
 });
 
 describe("Intro2 track", () => {
   it("opens the challenge modal on the in-progress step, with a flag box", async () => {
-    getIntro2Track.mockResolvedValue([step()]);
+    getIntro2Tracks.mockResolvedValue([track("web", [step()])]);
     renderPage();
 
     const card = await screen.findByRole("button", { name: /Your First Flag/ });
@@ -56,9 +60,20 @@ describe("Intro2 track", () => {
     expect(screen.getByPlaceholderText("friday{}")).toBeDefined();
   });
 
+  it("drops focus when a step is opened by mouse, so no ring lingers on the card", async () => {
+    getIntro2Tracks.mockResolvedValue([track("web", [step()])]);
+    renderPage();
+
+    const card = await screen.findByRole("button", { name: /Your First Flag/ });
+    fireEvent.click(card);
+
+    await screen.findByText("SUBMIT FLAG");
+    expect(document.activeElement).not.toBe(card);
+  });
+
   it("shows the step's attachments in the modal", async () => {
-    getIntro2Track.mockResolvedValue([
-      step({ files: [{ name: "cookie.txt", url: "/uploads/abc/cookie.txt", size: 33 }] }),
+    getIntro2Tracks.mockResolvedValue([
+      track("web", [step({ files: [{ name: "cookie.txt", url: "/uploads/abc/cookie.txt", size: 33 }] })]),
     ]);
     renderPage();
 
@@ -69,7 +84,7 @@ describe("Intro2 track", () => {
   });
 
   it("reopens a completed step so it can be reviewed", async () => {
-    getIntro2Track.mockResolvedValue([step({ status: "done" })]);
+    getIntro2Tracks.mockResolvedValue([track("web", [step({ status: "done" })])]);
     renderPage();
 
     fireEvent.click(await screen.findByRole("button", { name: /Your First Flag/ }));
@@ -77,8 +92,8 @@ describe("Intro2 track", () => {
   });
 
   it("keeps a locked step closed, so the guided order still means something", async () => {
-    getIntro2Track.mockResolvedValue([
-      step({ challenge_id: "i2", step: 2, title: "Inspect Element", status: "locked" }),
+    getIntro2Tracks.mockResolvedValue([
+      track("web", [step({ challenge_id: "i2", step: 2, title: "Inspect Element", status: "locked" })]),
     ]);
     renderPage();
 
@@ -91,14 +106,58 @@ describe("Intro2 track", () => {
     expect(screen.getByText("FINISH THE PREVIOUS STEP FIRST")).toBeDefined();
   });
 
-  it("still renders the progress summary", async () => {
-    getIntro2Track.mockResolvedValue([
-      step({ status: "done" }),
-      step({ challenge_id: "i2", step: 2, title: "Inspect Element", status: "in_progress" }),
+  it("stacks one section per category, headed and ordered like the challenge page", async () => {
+    getIntro2Tracks.mockResolvedValue([
+      // Alphabetical, the way the backend sends them.
+      track("crypto", [step({ challenge_id: "c1", title: "Base What?" })]),
+      track("pwn", [step({ challenge_id: "p1", title: "Stack Smash" })]),
+      track("web", [step({ challenge_id: "w1", title: "Inspect Element" })]),
     ]);
+    const { container } = renderPage();
+
+    await screen.findByText("Stack Smash");
+
+    const headings = [...container.querySelectorAll(".category-heading-name")].map(
+      (el) => el.textContent,
+    );
+    expect(headings).toEqual(["PWN", "WEB", "CRYPTO"]);
+
+    // Every track is on screen at once - no tab hides one.
+    expect(screen.getByText("Base What?")).toBeDefined();
+    expect(screen.getByText("Inspect Element")).toBeDefined();
+
+    // The rule between sections is the challenge page's, and never leads.
+    const sections = container.querySelectorAll(".category-section");
+    expect(sections.length).toBe(3);
+    expect(sections[0].classList.contains("category-section-split")).toBe(false);
+    expect(sections[1].classList.contains("category-section-split")).toBe(true);
+  });
+
+  it("meters each track on its own, not on all of INTRO2", async () => {
+    getIntro2Tracks.mockResolvedValue([
+      track("pwn", [
+        step({ challenge_id: "p1", status: "done" }),
+        step({ challenge_id: "p2", step: 2, status: "done" }),
+        step({ challenge_id: "p3", step: 3, status: "in_progress" }),
+      ]),
+      track("web", [step({ challenge_id: "w1", status: "in_progress" })]),
+    ]);
+    const { container } = renderPage();
+
+    await screen.findByText("2 / 3");
+    // pwn's two solves must not fill web's bar.
+    expect(screen.getByText("0 / 1")).toBeDefined();
+
+    const fills = [...container.querySelectorAll(".meter-fill")].map(
+      (el) => (el as HTMLElement).style.width,
+    );
+    expect(fills).toEqual([`${(2 / 3) * 100}%`, "0%"]);
+  });
+
+  it("says so when no track has any steps", async () => {
+    getIntro2Tracks.mockResolvedValue([]);
     renderPage();
 
-    expect(await screen.findByText("Your First Flag")).toBeDefined();
-    expect(screen.getByText("Inspect Element")).toBeDefined();
+    expect(await screen.findByText("No INTRO2 challenges configured yet.")).toBeDefined();
   });
 });

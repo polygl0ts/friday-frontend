@@ -360,6 +360,14 @@ export interface Intro2Step {
   files: RctfChallengeFile[];
 }
 
+/**
+ * One category's INTRO2 track, as `/api/intro2/tracks` returns it.
+ */
+export interface Intro2Track {
+  category: string;
+  steps: Intro2Step[];
+}
+
 /** Only what polygl0ts-extras owns. Player and challenge counts come from
  *  rCTF directly - see `pages/Admin.tsx`. */
 export interface AdminStats {

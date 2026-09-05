@@ -1,6 +1,7 @@
 import {
   CATEGORIES,
   type ArchivedCat,
+  type Category,
   type ChallengeWithMeta,
   type RctfFlagEntry,
   type Tier,
@@ -64,12 +65,32 @@ export function permissionNames(perms: number | null | undefined): string[] {
 const TIER_TAG_PREFIX = "tier/";
 const TIERS: readonly Tier[] = ["bronze", "silver", "gold"];
 
+/** The real categories, in the order the site shows them. */
+const ORDERED_CATEGORIES: readonly Category[] = CATEGORIES.filter(
+  (c) => c !== "all",
+);
+
 /** The categories a challenge can be grouped under
  * (i.e only the allowed categories).
  */
-const KNOWN_CATEGORIES: ReadonlySet<string> = new Set(
-  CATEGORIES.filter((c) => c !== "all"),
-);
+const KNOWN_CATEGORIES: ReadonlySet<string> = new Set(ORDERED_CATEGORIES);
+
+/**
+ * INTRO2 tracks in the site's own category order.
+ */
+export function orderIntro2Tracks<T extends { category: string }>(
+  tracks: readonly T[],
+): T[] {
+  const rank = (category: string) => {
+    const index = ORDERED_CATEGORIES.indexOf(category as Category);
+    return index === -1 ? ORDERED_CATEGORIES.length : index;
+  };
+  return [...tracks].sort(
+    (a, b) =>
+      rank(a.category) - rank(b.category) ||
+      a.category.localeCompare(b.category),
+  );
+}
 
 /**
  * Group the given challenges by categories. Categories are the one
