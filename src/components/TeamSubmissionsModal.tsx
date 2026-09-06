@@ -14,18 +14,6 @@ import type {
 
 /**
  * One team's submission log - what the team panel's DETAILED button opens.
- *
- * The view rCTF's own frontend has no equivalent of, and the reason it is worth
- * building: a solve list says what a team got right, and this says what they
- * *typed*. Every evaluated attempt, in order, with the literal flag string and
- * the source IP - which is what a flag-sharing or brute-force question is
- * actually answered from. `cheated` rows are the sharp end: a valid flag issued
- * to another team.
- *
- * Two things it is not. It is not a request log - rate-limited attempts, and
- * attempts by a banned team or against an unknown challenge, are refused before
- * rCTF writes a row. And it is not retroactive: the log only holds what has
- * been submitted since the rCTF version that introduced it.
  */
 
 /** Below rCTF's cap of 100, deliberately: a page an admin can read top to
@@ -44,15 +32,14 @@ const RESULTS: Record<string, { label: string; tone: string }> = {
 };
 
 function resultOf(result: string): { label: string; tone: string } {
-  return RESULTS[result] ?? { label: result.replace(/_/g, " ").toUpperCase(), tone: "dim" };
+  return (
+    RESULTS[result] ?? {
+      label: result.replace(/_/g, " ").toUpperCase(),
+      tone: "dim",
+    }
+  );
 }
 
-/**
- * The filter pills. Two different filters behind one control on purpose: the
- * four flag results and the admin-bot *kind* are what an admin actually asks
- * for, and no admin-bot row carries a flag result - the two sets never overlap,
- * so a single row of choices cannot express a contradiction.
- */
 interface Filter {
   key: string;
   label: string;
@@ -65,7 +52,11 @@ const FILTERS: Filter[] = [
   { key: "correct", label: "CORRECT", results: ["correct"] },
   { key: "cheated", label: "CHEATED", results: ["cheated"] },
   { key: "incorrect", label: "INCORRECT", results: ["incorrect"] },
-  { key: "already_solved", label: "ALREADY SOLVED", results: ["already_solved"] },
+  {
+    key: "already_solved",
+    label: "ALREADY SOLVED",
+    results: ["already_solved"],
+  },
 ];
 
 /** Column headings, and the `sortBy` each one asks rCTF for. FLAG has none:
@@ -82,22 +73,23 @@ const COLUMNS: { label: string; sortBy?: RctfSubmissionSortBy }[] = [
 
 /**
  * What the row shows in its FLAG column.
- *
- * A flag submission carries the string that was typed, even when it was wrong -
- * that is the column's whole reason to exist. An admin-bot job carries no flag
- * but does carry its inputs, which is the equivalent thing to see. Everything
- * else - an admin-granted solve, most of all - genuinely has no payload, and
- * says so rather than printing an empty cell that reads like a bug.
  */
-function payloadOf(submission: RctfSubmission): { text: string; kind: "flag" | "inputs" | "none" } {
+function payloadOf(submission: RctfSubmission): {
+  text: string;
+  kind: "flag" | "inputs" | "none";
+} {
   const flag = submittedFlag(submission);
-  if (flag !== null) return { text: flag === "" ? "(empty)" : flag, kind: "flag" };
+  if (flag !== null)
+    return { text: flag === "" ? "(empty)" : flag, kind: "flag" };
 
   const inputs = submission.details?.inputs;
   if (inputs && typeof inputs === "object" && !Array.isArray(inputs)) {
     const pairs = Object.entries(inputs as Record<string, unknown>);
     if (pairs.length > 0) {
-      return { text: pairs.map(([k, v]) => `${k}=${String(v)}`).join("  "), kind: "inputs" };
+      return {
+        text: pairs.map(([k, v]) => `${k}=${String(v)}`).join("  "),
+        kind: "inputs",
+      };
     }
   }
   return { text: "no flag recorded", kind: "none" };
@@ -106,13 +98,14 @@ function payloadOf(submission: RctfSubmission): { text: string; kind: "flag" | "
 /** A row's timestamp, to the second, falling back to whatever rCTF sent when
  *  it is not a date this can read. See `parseRctfTimestamp`. */
 function timeOf(submission: RctfSubmission): string {
-  return formatTimestamp(submission.createdAt, true) ?? submission.createdAtRaw ?? "-";
+  return (
+    formatTimestamp(submission.createdAt, true) ??
+    submission.createdAtRaw ??
+    "-"
+  );
 }
 
-/** Everything the row does not have room for, opened one row at a time. The
- *  raw `details` object is printed as it arrived: it is provider-specific, and
- *  guessing at its shape is how a matched-flag config or an admin-bot error
- *  goes missing. */
+/** Everything the row does not have room for, opened one row at a time*/
 function SubmissionDetail({ submission }: { submission: RctfSubmission }) {
   const entries: [string, string | null][] = [
     ["SUBMISSION ID", submission.id],
@@ -131,17 +124,27 @@ function SubmissionDetail({ submission }: { submission: RctfSubmission }) {
         {entries.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
-            <dd>{value ?? <span className="admin-cell-empty">&mdash;</span>}</dd>
+            <dd>
+              {value ?? <span className="admin-cell-empty">&mdash;</span>}
+            </dd>
           </div>
         ))}
       </dl>
       <div className="sub-detail-label">DETAILS</div>
-      <pre className="sub-detail-json">{JSON.stringify(submission.details ?? {}, null, 2)}</pre>
+      <pre className="sub-detail-json">
+        {JSON.stringify(submission.details ?? {}, null, 2)}
+      </pre>
     </div>
   );
 }
 
-export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; onClose: () => void }) {
+export function TeamSubmissionsModal({
+  team,
+  onClose,
+}: {
+  team: RctfAdminUser;
+  onClose: () => void;
+}) {
   const [filter, setFilter] = useState<Filter>(FILTERS[0]);
   const [sortBy, setSortBy] = useState<RctfSubmissionSortBy>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -185,24 +188,16 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
   /**
    * How many submissions this team has made, all of them - a fact about the
    * team, stated beside its solve count and its score.
-   *
-   * Its own request rather than the page's `total`, which counts what the
-   * filters matched: a number sitting between SOLVES and PTS must not move when
-   * a pill is clicked, or it reads as one of those two changing. The filtered
-   * count is in the footer, next to the pager it belongs to. `limit: 1` because
-   * only the count is wanted; rCTF computes `total` independently of the page.
    */
   const countQuery = useQuery({
     queryKey: ["teamSubmissionsTotal", team.id, snapshot],
-    queryFn: () => listTeamSubmissions(team.id, { limit: 1, createdBefore: snapshot }),
+    queryFn: () =>
+      listTeamSubmissions(team.id, { limit: 1, createdBefore: snapshot }),
     select: (page) => page.total,
   });
 
   const rows = query.data?.submissions ?? [];
   const total = query.data?.total ?? 0;
-  // Off the rows on screen, not off `offset`: a page can come back empty while
-  // the filter still matches rows elsewhere in the log, and counting from the
-  // offset alone prints the backwards "1-0 OF 9".
   const range =
     rows.length > 0
       ? `${offset + 1}-${offset + rows.length} OF ${total}`
@@ -210,10 +205,6 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
         ? `0 OF ${total}`
         : "0 SUBMISSIONS";
 
-  // Team facts come off the rows when there are any: these are rCTF's own
-  // values for this team, and two of them - country and status - reach the
-  // frontend through no other call the app makes. The team row from the panel
-  // is the fallback, and says the same thing about name, division and ban.
   const sample = rows[0];
   const division = sample?.userDivision || team.division;
   const banned = sample?.userBanned ?? team.banned;
@@ -235,10 +226,19 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
         <div className="modal-header">
           <span className="sub-team">
             <span className="row-avatar">
-              {avatarUrl && <img className="avatar-img" src={avatarUrl} alt="" />}
+              {avatarUrl && (
+                <img className="avatar-img" src={avatarUrl} alt="" />
+              )}
             </span>
             <span className="sub-team-name">
-              <span className="heading" style={{ fontSize: 15, color: "var(--text-bright)", fontWeight: 600 }}>
+              <span
+                className="heading"
+                style={{
+                  fontSize: 15,
+                  color: "var(--text-bright)",
+                  fontWeight: 600,
+                }}
+              >
                 {sample?.userName || team.name}
               </span>
               <span className="admin-team-id">{team.id}</span>
@@ -251,15 +251,13 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
 
         <div className="sub-facts">
           <span className="chip chip-tag">{division || "no division"}</span>
-          {banned && <span className="chip chip-tag sub-chip-alarm">BANNED</span>}
-          {sample?.userCountryCode && <span className="chip chip-tag">{sample.userCountryCode}</span>}
-          {sample?.userStatusText && <span className="chip chip-tag">{sample.userStatusText}</span>}
+          {banned && (
+            <span className="chip chip-tag sub-chip-alarm">BANNED</span>
+          )}
           <span className="sub-facts-spacer" />
           <span className="sub-facts-count">
-            {team.solveCount} SOLVES &middot;{" "}
-            {/* A dash until the count is in, not 0: "no submissions yet" and
-                "not read yet" are different answers, and they read the same. */}
-            {countQuery.data ?? "-"} SUBMISSIONS &middot; {team.score} PTS
+            {team.solveCount} SOLVES &middot; {countQuery.data ?? "-"}{" "}
+            SUBMISSIONS &middot; {team.score} PTS
           </span>
         </div>
 
@@ -290,8 +288,12 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
         </div>
 
         <div className="modal-body sub-body">
-          {query.isLoading && <div className="loading">Loading submissions...</div>}
-          {query.error && <div className="error-text">{(query.error as Error).message}</div>}
+          {query.isLoading && (
+            <div className="loading">Loading submissions...</div>
+          )}
+          {query.error && (
+            <div className="error-text">{(query.error as Error).message}</div>
+          )}
           {query.isSuccess && rows.length === 0 && (
             <div className="empty-text">
               {total === 0 && !search && filter.key === "all"
@@ -312,7 +314,9 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
                       onClick={() => sortOn(column.sortBy!)}
                     >
                       {column.label}
-                      {column.sortBy === sortBy && <span>{sortOrder === "desc" ? " ▾" : " ▴"}</span>}
+                      {column.sortBy === sortBy && (
+                        <span>{sortOrder === "desc" ? " ▾" : " ▴"}</span>
+                      )}
                     </button>
                   ) : (
                     <span key={column.label}>{column.label}</span>
@@ -340,26 +344,33 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
                         }
                       }}
                     >
-                      {/* Titled with its own text: the cell clips rather than
-                          overlapping the column beside it, so a value too long
-                          for the column is still readable on hover. */}
                       <span className="sub-time" title={timeOf(submission)}>
                         {timeOf(submission)}
                       </span>
                       <span className="sub-chall">
-                        <span style={{ color: "var(--text-bright)" }}>{submission.challengeName}</span>
-                        <span className="admin-chall-id">{submission.challengeCategory || "—"}</span>
+                        <span style={{ color: "var(--text-bright)" }}>
+                          {submission.challengeName}
+                        </span>
+                        <span className="admin-chall-id">
+                          {submission.challengeCategory || "—"}
+                        </span>
                       </span>
-                      <span className="sub-kind">{submission.kind === "admin_bot" ? "ADMIN BOT" : "FLAG"}</span>
+                      <span className="sub-kind">
+                        {submission.kind === "admin_bot" ? "ADMIN BOT" : "FLAG"}
+                      </span>
                       <span className={`sub-result sub-result-${result.tone}`}>
                         {result.label}
                         {submission.cheatedFromId && (
                           <span className="sub-cheated">
-                            from {submission.cheatedFromName ?? submission.cheatedFromId}
+                            from{" "}
+                            {submission.cheatedFromName ??
+                              submission.cheatedFromId}
                           </span>
                         )}
                       </span>
-                      <span className={`sub-flag sub-flag-${payload.kind} sub-flag-${result.tone}`}>
+                      <span
+                        className={`sub-flag sub-flag-${payload.kind} sub-flag-${result.tone}`}
+                      >
                         {payload.text}
                       </span>
                       <span className="sub-ip">{submission.ip}</span>
@@ -375,7 +386,9 @@ export function TeamSubmissionsModal({ team, onClose }: { team: RctfAdminUser; o
         <div className="sub-footer">
           <span className="sub-range">
             {range}
-            {query.isFetching && <span className="sub-fetching"> &middot; LOADING</span>}
+            {query.isFetching && (
+              <span className="sub-fetching"> &middot; LOADING</span>
+            )}
           </span>
           <div className="sub-pager">
             <button

@@ -503,6 +503,36 @@ export async function setReleaseTime(
 }
 
 /**
+ * Set the scoring curve endpoints of one challenge.
+ */
+export async function setChallengePoints(
+  challengeId: string,
+  newPoints: { min?: number; max?: number },
+): Promise<{ min: number; max: number }> {
+  const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}`;
+  const res = await request<unknown>(ORIGIN, path);
+  const current = unwrap<Partial<RctfAdminChallenge>>(res);
+
+  const minPoints = newPoints.min ?? current?.points?.min ?? 50;
+  const maxPoints = newPoints.max ?? current?.points?.max ?? 500;
+
+  if (!Number.isInteger(minPoints) || !Number.isInteger(maxPoints))
+    throw new Error("Points must be whole numbers.");
+  if (minPoints < 0 || maxPoints < 0)
+    throw new Error("Points cannot be negative.");
+  if (minPoints > maxPoints)
+    throw new Error("Minimum points cannot be above maximum points.");
+
+  const points = { min: minPoints, max: maxPoints };
+  await request<unknown>(ORIGIN, path, {
+    method: "PUT",
+    body: { data: { points } },
+  });
+
+  return points;
+}
+
+/**
  * Append one static flag to a challenge, keeping the ones already there.
  */
 export async function addFlag(

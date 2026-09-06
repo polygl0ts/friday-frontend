@@ -842,8 +842,8 @@ a:hover {
 
 .table-row.table-challs {
   grid-template-columns:
-    minmax(0, 1.25fr) minmax(0, 0.65fr) minmax(0, 0.5fr) minmax(0, 1.6fr)
-    minmax(0, 1fr) minmax(0, 0.45fr) minmax(0, 0.95fr);
+    minmax(0, 1.25fr) minmax(0, 0.65fr) minmax(0, 0.5fr) minmax(0, 0.5fr)
+    minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.45fr) minmax(0, 0.95fr);
   gap: 14px;
   align-items: start;
 }
@@ -852,7 +852,7 @@ a:hover {
     overflow-x: auto;
   }
   .table-row.table-challs {
-    min-width: 1040px;
+    min-width: 1180px;
   }
 }
 
@@ -938,6 +938,7 @@ a:hover {
 .hide-challenge,
 .ban-team,
 .change-tag,
+.change-score,
 .view-submissions {
   padding: 2px 7px;
   border: 2px solid var(--border);
@@ -954,6 +955,7 @@ a:hover {
 .hide-challenge:hover:not(:disabled),
 .ban-team:hover:not(:disabled),
 .change-tag:hover:not(:disabled),
+.change-score:hover:not(:disabled),
 .change-division:hover:not(:disabled),
 .release-challenge:hover:not(:disabled),
 .view-submissions:hover:not(:disabled) {
@@ -964,6 +966,7 @@ a:hover {
 .hide-challenge:disabled,
 .ban-team:disabled,
 .change-tag:disabled,
+.change-score:disabled,
 .change-division:disabled,
 .release-challenge:disabled,
 .view-submissions:disabled {
@@ -977,39 +980,41 @@ a:hover {
 
 /* ---------- admin: the add-flag control ---------- */
 
-.table-row.table-challs:has(> :nth-child(8)) {
+.table-row.table-challs:not(.table-head) {
   row-gap: 8px;
 }
-.table-row.table-challs:has(> :nth-child(8)) > :nth-child(4) {
-  grid-area: 2 / 4;
+/* The add-flag control is the one cell on a second row, tucked under FLAG;
+   every cell after it is therefore one place ahead of its column. */
+.table-row.table-challs:not(.table-head) > :nth-child(5) {
+  grid-area: 2 / 5;
 }
-.table-row.table-challs:has(> :nth-child(8)) > :nth-child(5) {
-  grid-area: 1 / 4;
-}
-.table-row.table-challs:has(> :nth-child(8)) > :nth-child(6) {
+.table-row.table-challs:not(.table-head) > :nth-child(6) {
   grid-area: 1 / 5;
 }
-.table-row.table-challs:has(> :nth-child(8)) > :nth-child(7) {
+.table-row.table-challs:not(.table-head) > :nth-child(7) {
   grid-area: 1 / 6;
 }
-.table-row.table-challs:has(> :nth-child(8)) > :nth-child(8) {
+.table-row.table-challs:not(.table-head) > :nth-child(8) {
   grid-area: 1 / 7;
 }
+.table-row.table-challs:not(.table-head) > :nth-child(9) {
+  grid-area: 1 / 8;
+}
 
-.table-challs > :nth-child(4) .hide-challenge {
+.table-challs > :nth-child(5) .hide-challenge {
   white-space: nowrap;
 }
-.table-challs > :nth-child(4) .hide-challenge:hover:not(:disabled) {
+.table-challs > :nth-child(5) .hide-challenge:hover:not(:disabled) {
   border-color: var(--green);
   background: var(--green);
   color: #fff;
 }
 
-.table-challs > :nth-child(4) > form {
+.table-challs > :nth-child(5) > form {
   align-self: stretch;
   margin: 0;
 }
-.table-challs > :nth-child(4) input {
+.table-challs > :nth-child(5) input {
   width: 100%;
   padding: 5px 8px;
   border: 2px solid var(--border);
@@ -1019,10 +1024,10 @@ a:hover {
   font-size: 12px;
   line-height: 1.5;
 }
-.table-challs > :nth-child(4) input::placeholder {
+.table-challs > :nth-child(5) input::placeholder {
   color: var(--text-dimmer);
 }
-.table-challs > :nth-child(4) input:focus {
+.table-challs > :nth-child(5) input:focus {
   outline: none;
   border-color: var(--green);
 }
@@ -1201,6 +1206,85 @@ a:hover {
   line-height: 1.6;
 }
 .division-orphan .division-key {
+  color: var(--amber);
+}
+
+/* ---------- admin: the scoring control ---------- */
+
+.admin-points {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+.admin-points-static {
+  color: var(--text-dim);
+}
+
+.change-score {
+  white-space: nowrap;
+}
+
+.points-form {
+  margin: 0;
+}
+
+.points-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.points-field {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.points-label {
+  color: var(--text-dimmer);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.points-input {
+  width: 100%;
+  border: 3px solid var(--border);
+  padding: 11px 12px;
+  background: var(--bg-input);
+  color: var(--text);
+  font-family: "Space Mono", monospace;
+  font-size: 15px;
+  text-align: center;
+}
+.points-input:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+.points-input::placeholder {
+  color: var(--text-dimmer);
+}
+
+.points-arrow {
+  padding-bottom: 13px;
+  color: var(--text-dimmer);
+  font-size: 13px;
+}
+
+.points-preview {
+  margin-top: 14px;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.points-key {
+  font-family: "Space Mono", monospace;
+  color: var(--text-bright);
+}
+.points-key-next {
   color: var(--amber);
 }
 

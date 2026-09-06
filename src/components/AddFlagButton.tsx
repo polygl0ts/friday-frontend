@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addFlag } from "../api/rctf";
 import { useAuth } from "../auth/AuthContext";
 import { ConfirmDialog } from "./ConfirmDialog";
-import type { RctfFlagEntry } from "../types"
+import type { RctfFlagEntry } from "../types";
 
 type Step = "idle" | "typing" | "confirming";
 
@@ -23,10 +22,10 @@ export function AddFlagButton({
 }) {
   const queryClient = useQueryClient();
   const { canWriteChalls } = useAuth();
-  const [ step, setStep ] = useState<Step>("idle");
-  const [ flag, setFlag ] = useState<string>("");
+  const [step, setStep] = useState<Step>("idle");
+  const [flag, setFlag] = useState<string>("");
   const mutation = useMutation({
-    mutationFn: () => addFlag(challengeId, flags, flag), 
+    mutationFn: () => addFlag(challengeId, flags, flag),
     onSuccess: () => setStep("idle"),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["adminChallenges"] });
@@ -34,9 +33,7 @@ export function AddFlagButton({
     },
   });
 
-
   if (!canWriteChalls) return null;
-
 
   return (
     <>
@@ -52,17 +49,17 @@ export function AddFlagButton({
             setStep("typing");
           }}
         >
-        Add new flag.
+          Add new flag.
         </button>
 
-        { step === "typing" && (
+        {step === "typing" && (
           <form
             onSubmit={(e) => {
               e.preventDefault();
               setStep("confirming");
             }}
           >
-            <input 
+            <input
               type="text"
               placeholder="New flag..."
               value={flag}
@@ -71,8 +68,7 @@ export function AddFlagButton({
           </form>
         )}
 
-        { step === "confirming" && flag !== "" && (
-              
+        {step === "confirming" && flag !== "" && (
           <ConfirmDialog
             title="Add this new flag ?"
             confirmLabel={mutation.isPending ? "SAVING..." : "SET NEW FLAG"}
@@ -85,10 +81,8 @@ export function AddFlagButton({
               setStep("typing");
             }}
           >
-
-          <span style={{ color: "var(--text-bright)" }}>{challengeName}</span> Add new flag {" "}
-          <span style={{ color: "var(--amber)" }}>{flag}</span>
-          
+            <span style={{ color: "var(--text-bright)" }}>{challengeName}</span>{" "}
+            Add new flag <span style={{ color: "var(--amber)" }}>{flag}</span>
           </ConfirmDialog>
         )}
       </span>
