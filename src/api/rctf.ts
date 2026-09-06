@@ -169,12 +169,6 @@ export function challengeFileUrl(url: string): string {
 
 /**
  * Every challenge as configured, hidden and unreleased ones included.
- *
- * A different route from `listChallenges`, not a richer variant of it: this one
- * is `authRequired` and gated on the `challsRead` permission - the same bit
- * `isAdminPerms` reads to put ADMIN in the nav, so anyone who can reach the
- * admin panel can reach this. It answers with the *stored* challenge rows,
- * which is why flags, `hidden` and `releaseTime` appear here and nowhere else.
  */
 export async function listAdminChallenges(): Promise<RctfAdminChallenge[]> {
   const res = await request<unknown>(ORIGIN, `${V2_BASE}/admin/challs`);
@@ -189,7 +183,6 @@ export async function listAdminChallenges(): Promise<RctfAdminChallenge[]> {
     files: c.files ?? [],
     flags: c.flags ?? [],
     tags: c.tags ?? null,
-    solveCount: c.solveCount ?? 0,
     hidden: c.hidden ?? false,
     releaseTime: c.releaseTime ?? null,
     sortWeight: c.sortWeight ?? null,

@@ -474,7 +474,6 @@ describe("listAdminChallenges", () => {
           releaseTime: 1767225600000,
           sortWeight: 5,
           tiebreakEligible: true,
-          solveCount: 12,
         },
       ],
     });
@@ -482,7 +481,6 @@ describe("listAdminChallenges", () => {
     const [chall] = await listAdminChallenges();
 
     expect(chall.hidden).toBe(true);
-    expect(chall.solveCount).toBe(12);
     expect(chall.releaseTime).toBe(1767225600000);
     expect(chall.flags[0].config).toEqual({ flag: "friday{baby_rev}" });
     // `points` is the configured curve here, where /v2/challs sends the single
@@ -503,9 +501,24 @@ describe("listAdminChallenges", () => {
     expect(chall.tags).toBeNull();
     expect(chall.releaseTime).toBeNull();
     expect(chall.hidden).toBe(false);
-    expect(chall.solveCount).toBe(0);
     // No name of its own: the id is the only thing left to call it.
     expect(chall.name).toBe("sparse");
+  });
+
+  it("does not invent a solve count this route never sends", async () => {
+    // The bug this replaces: rCTF's schema says `solveCount` is `Total solves;
+    // only present on the single-challenge endpoint`, and the list handler
+    // spreads the stored config blob without it. Reading it here was
+    // `undefined ?? 0`, so the admin panel's SOLVES column read 0 for every
+    // challenge for the whole event, refetch or not.
+    stubFetch({
+      kind: "goodAdminChallengesV2",
+      data: [{ id: "baby-rev", name: "baby rev", solveCount: 12 }],
+    });
+
+    const [chall] = await listAdminChallenges();
+
+    expect(chall).not.toHaveProperty("solveCount");
   });
 });
 

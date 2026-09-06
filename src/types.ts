@@ -55,10 +55,6 @@ export interface RctfAdminChallenge {
   files: RctfChallengeFile[];
   flags: RctfFlagEntry[];
   tags: string[] | null;
-  /** Teams that have solved it. Counted over every challenge, hidden ones
-   *  included - the public `/v2/challs` list only reports solves for
-   *  challenges it shows in the first place. */
-  solveCount: number;
   /** Hidden challenges are absent from `/v2/challs` entirely, so this is the
    *  only listing that shows they exist. */
   hidden: boolean;

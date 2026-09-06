@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getLeaderboard, listAdminChallenges } from "../api/rctf";
+import {
+  getLeaderboard,
+  getLeaderboardChallenges,
+  listAdminChallenges,
+} from "../api/rctf";
 import { staticFlag } from "../utils";
 import { HideChallButton } from "../components/HideChallButton";
 import { ReleaseButton } from "../components/ReleaseButton";
@@ -106,9 +110,19 @@ function SolvesCell({
   solveCount,
   teamCount,
 }: {
-  solveCount: number;
+  solveCount: number | null;
   teamCount: number | null;
 }) {
+  if (solveCount === null)
+    return (
+      <span
+        className="admin-cell-empty"
+        title="Only released, visible challenges are counted on the leaderboard."
+      >
+        &mdash;
+      </span>
+    );
+
   const share = teamCount ? solveCount / teamCount : null;
   return (
     <span
@@ -119,7 +133,10 @@ function SolvesCell({
     >
       <span
         style={{
-          color: solveCount > 0 ? "var(--text-bright)" : "var(--text-dimmer)",
+          color:
+            solveCount === teamCount
+              ? "var(--text-bright)"
+              : "var(--text-dimmer)",
         }}
       >
         {solveCount}
@@ -141,6 +158,16 @@ export function AdminChallenges() {
     queryFn: () => getLeaderboard(1),
   });
   const teamCount = teamsQuery.data?.total ?? null;
+  // Required because full list doesn't have the solve count.
+  const solvesQuery = useQuery({
+    queryKey: ["leaderboardChallenges"],
+    queryFn: getLeaderboardChallenges,
+    retry: false,
+  });
+  const solvesById = useMemo(
+    () => new Map((solvesQuery.data ?? []).map((c) => [c.id, c.solves])),
+    [solvesQuery.data],
+  );
 
   const challenges = [...(challengesQuery.data ?? [])].sort(byCategoryThenName);
   const hiddenCount = challenges.filter((c) => c.hidden).length;
@@ -209,7 +236,10 @@ export function AdminChallenges() {
                 minChallPoints={chall.points.min}
                 maxChallPoints={chall.points.max}
               />
-              <SolvesCell solveCount={chall.solveCount} teamCount={teamCount} />
+              <SolvesCell
+                solveCount={solvesById.get(chall.id) ?? null}
+                teamCount={teamCount}
+              />
               <AddFlagButton
                 challengeId={chall.id}
                 challengeName={chall.name}

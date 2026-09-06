@@ -2,12 +2,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminChallenges } from "./AdminChallenges";
-import { getLeaderboard, listAdminChallenges } from "../api/rctf";
+import {
+  getLeaderboard,
+  getLeaderboardChallenges,
+  listAdminChallenges,
+} from "../api/rctf";
 import type { RctfAdminChallenge } from "../types";
 
 vi.mock("../api/rctf", () => ({
   listAdminChallenges: vi.fn(),
   getLeaderboard: vi.fn(),
+  getLeaderboardChallenges: vi.fn(),
   // The HIDDEN cell's own request. Never called from these tests, but the
   // factory has to carry it: a named import missing from a mocked module is an
   // error at import time, not at call time.
@@ -23,6 +28,13 @@ vi.mock("../auth/AuthContext", () => ({
 
 const mockList = vi.mocked(listAdminChallenges);
 const mockLeaderboard = vi.mocked(getLeaderboard);
+const mockSolves = vi.mocked(getLeaderboardChallenges);
+
+/** A row on `/v2/leaderboard/challs`, which is where the SOLVES column's
+ *  numerator comes from - `/v2/admin/challs` carries no count of its own. */
+function solves(id: string, count: number) {
+  return { id, name: id, category: "rev", points: 100, solves: count, firstSolvers: [] };
+}
 
 function chall(over: Partial<RctfAdminChallenge> = {}): RctfAdminChallenge {
   return {
@@ -39,7 +51,6 @@ function chall(over: Partial<RctfAdminChallenge> = {}): RctfAdminChallenge {
     releaseTime: null,
     sortWeight: null,
     tiebreakEligible: true,
-    solveCount: 0,
     ...over,
   };
 }
@@ -71,7 +82,9 @@ function flagButtons(line: HTMLElement): HTMLElement[] {
 beforeEach(() => {
   mockList.mockReset();
   mockLeaderboard.mockReset();
+  mockSolves.mockReset();
   mockLeaderboard.mockResolvedValue({ total: 40, entries: [] });
+  mockSolves.mockResolvedValue([]);
 });
 
 describe("AdminChallenges", () => {
@@ -79,11 +92,11 @@ describe("AdminChallenges", () => {
     mockList.mockResolvedValue([
       chall({
         tags: ["tier/bronze", "intro2"],
-        hidden: true,
         releaseTime: new Date(2026, 0, 2, 3, 4).getTime(),
-        solveCount: 12,
+        hidden: true,
       }),
     ]);
+    mockSolves.mockResolvedValue([solves("baby-rev", 12)]);
 
     renderPage();
     const line = await row("baby rev");
@@ -150,23 +163,55 @@ describe("AdminChallenges", () => {
     expect(within(await row("already")).queryByText("SCHEDULED")).toBeNull();
   });
 
-  it("counts solves for a hidden challenge too", async () => {
-    // rCTF counts these on every challenge, hidden included - hiding one does
-    // not un-solve it, and a 0 here would say it was never solved.
+  it("dashes the count for a challenge the leaderboard does not count", async () => {
+    // `/v2/leaderboard/challs` filters on `hidden = false AND releaseTime <=
+    // now()`, so a hidden challenge is simply absent from it. Rendering 0
+    // would claim it was never solved, which is exactly wrong for one hidden
+    // *after* teams solved it - the count is unknown, and says so.
     mockList.mockResolvedValue([
-      chall({ id: "c1", name: "was open", hidden: true, solveCount: 7 }),
+      chall({ id: "c1", name: "was open", hidden: true }),
+      chall({ id: "c2", name: "still up" }),
     ]);
+    mockSolves.mockResolvedValue([solves("c2", 7)]);
 
     renderPage();
 
-    expect(within(await row("was open")).getByText("7")).toBeTruthy();
+    expect((await row("was open")).textContent).toContain("\u2014");
+    expect(within(await row("still up")).getByText("7")).toBeTruthy();
+  });
+
+  it("takes the solve count from the leaderboard, not the admin row", async () => {
+    // The regression this guards: the count used to be read off
+    // `/v2/admin/challs`, which never sends one, so every row read 0 and never
+    // moved. A count arriving here at all means it came from the other route.
+    mockList.mockResolvedValue([chall({ id: "c1", name: "counted" })]);
+    mockSolves.mockResolvedValue([solves("c1", 23)]);
+
+    renderPage();
+
+    expect(within(await row("counted")).getByText("23")).toBeTruthy();
+  });
+
+  it("keeps the table when the solve counts fail to load", async () => {
+    // The board is start-gated; before the CTF opens this request errors. The
+    // panel is still the only place hidden challenges are listed.
+    mockList.mockResolvedValue([chall({ id: "c1", name: "early" })]);
+    mockSolves.mockRejectedValue(new Error("not started"));
+
+    renderPage();
+
+    await waitFor(() =>
+      expect((screen.getByText("early").closest(".table-row") as HTMLElement).textContent)
+        .toContain("\u2014"),
+    );
   });
 
   it("shows the count alone until the team total arrives", async () => {
     // The numerator is the real content; it should not wait on a second
     // request, and an unanswered denominator must not render as "/0".
     mockLeaderboard.mockReturnValue(new Promise(() => {}));
-    mockList.mockResolvedValue([chall({ id: "c1", name: "solo", solveCount: 3 })]);
+    mockList.mockResolvedValue([chall({ id: "c1", name: "solo" })]);
+    mockSolves.mockResolvedValue([solves("c1", 3)]);
 
     renderPage();
     const line = await row("solo");
