@@ -16,7 +16,7 @@
   --red-soft: #ff8a94;
   --red-deep: #7a0a15;
 
-  --text: #f2eded;
+  --text: #d3d0d0;
   --text-bright: #f2eded;
   --text-dim: #9a8f90;
   --text-dimmer: #8a7f80;
@@ -1943,7 +1943,7 @@ a:hover {
 .md {
   font-size: 13px;
   line-height: 1.75;
-  color: var(--text-dim);
+  color: var(--text);
   overflow-wrap: break-word;
 }
 .md > *:first-child {
