@@ -1959,7 +1959,6 @@ a:hover {
   font-family: "Space Mono", monospace;
   color: var(--text-bright);
   font-weight: 700;
-  text-transform: uppercase;
   line-height: 1.35;
   margin: 26px 0 12px;
 }
