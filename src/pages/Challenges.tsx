@@ -106,6 +106,7 @@ export function Challenges() {
         <ChallengeModal
           challengeId={detailsChallenge.id}
           challengeName={detailsChallenge.name}
+          author={detailsChallenge.author}
           category={detailsChallenge.category}
           description={detailsChallenge.description}
           files={detailsChallenge.files}

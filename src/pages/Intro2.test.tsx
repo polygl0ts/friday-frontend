@@ -23,6 +23,7 @@ function step(over: Partial<Intro2Step> = {}): Intro2Step {
     challenge_id: "i1",
     step: 1,
     title: "Your First Flag",
+    author: "veganjay",
     description: "Find the flag format and submit it.",
     status: "in_progress",
     category: "web",

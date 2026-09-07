@@ -167,6 +167,7 @@ export function Intro2() {
         <ChallengeModal
           challengeId={openStep.challenge_id}
           challengeName={openStep.title}
+          author={openStep.author}
           category={openStep.category || "intro2"}
           description={openStep.description}
           files={openStep.files}

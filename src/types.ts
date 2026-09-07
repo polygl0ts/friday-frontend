@@ -10,6 +10,7 @@ export interface RctfChallengeFile {
 export interface RctfChallenge {
   id: string;
   name: string;
+  author: string;
   category: string;
   description: string;
   points: number;
@@ -160,6 +161,8 @@ export interface RctfSubmission {
   details: Record<string, unknown>;
   /** The solve this submission created, or the admin-bot job it queued. */
   relatedId: string | null;
+  /** Parsed to Unix milliseconds by `listTeamSubmissions`; null when rCTF sent
+   *  something unparseable - see `parseRctfTimestamp`. */
   createdAt: number | null;
   /** Exactly what rCTF sent, so an unparseable timestamp can still be shown. */
   createdAtRaw: string;
@@ -339,6 +342,7 @@ export interface Intro2Step {
   challenge_id: string;
   step: number;
   title: string;
+  author: string;  // "" when rCTF has no author on the challenge
   description: string;
   status: "done" | "in_progress" | "locked";
   category: string;
