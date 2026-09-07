@@ -15,4 +15,4 @@ First you'll need to [login](https://friday.polygl0ts.ch/login). We'll send you 
 + **English comms**. The friday meetings and discord channels are english-first.
 + **Be nice**. Don't discriminate etc. etc. religion, queerness, etc. etc.
 
-[^1]: We may make exception's from time to time, but generally noone wants to play "open division" CTFs.
+[^1]: We may make exception's from time to time, but generally no one wants to play "open division" CTFs.
