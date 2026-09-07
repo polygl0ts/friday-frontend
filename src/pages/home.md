@@ -5,7 +5,7 @@ that runs throughout the whole week.
 
 Never played CTFs before? Don't worry! We're active on the [polygl0ts discord](https://discord.gg/7Zx4FZyTSP) and are happy to answer any questions. We hold meetings every friday at 17h at EPFL, come hang out, ask questions, play CTFs, and eat pizza!
 
-First you'll need to [login](https://friday.polygl0ts.ch/login). We'll send you a login token, save that where you would normally save your passwords. Then you should check out our [Friday Challenges](https://friday.polygl0ts.ch/chall) first! They are meant to ease you into CTFs and are for beginner and intermediate players alike.
+First you'll need to [login](https://friday.polygl0ts.ch/login). We'll send you a login token, save that where you would normally save your passwords. Then you can check out our [Friday Challenges](https://friday.polygl0ts.ch/chall). They are meant to ease you into CTFs and are for beginner and intermediate players alike.
 
 ## Rules
 
