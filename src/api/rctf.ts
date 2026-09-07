@@ -438,17 +438,6 @@ export async function listDivisions(): Promise<RctfDivision[]> {
 
 /**
  * Move a team into a division.
- *
- * rCTF does *not* validate this value. The route's schema types `division` as
- * a bare string and declares no division error, so any string answers 200 and
- * is stored verbatim - including one matching no configured division. Nor does
- * writing a new name create one: divisions come from the config (see
- * `listDivisions`), and a team written to an unconfigured key is orphaned. It
- * keeps its score and its place on the global leaderboard, drops off every
- * division board, and cannot be listed back, because `?division=<that key>` is
- * itself rejected with `400 Invalid division`. Checked against rCTF, not
- * inferred - and note that the player's own route, `PATCH /v2/users/me`,
- * *does* reject the same value with `badDivisionNotAllowed`. Only this is open.
  */
 export async function setDivisionTeam(
   teamId: string,
@@ -479,6 +468,18 @@ export async function setChallengeHidden(
     body: { data: { hidden } },
   });
 }
+/**
+ * Revoke the submission for the given challenge for the given team.
+ */
+export async function revokeSubmission(
+  challengeId: string,
+  userId: string,
+): Promise<void> {
+  const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}/solves/${encodeURIComponent(userId)}`;
+  await request<unknown>(ORIGIN, path, {
+    method: "DELETE",
+  });
+}
 
 /**
  * Set a new release time for the given challenge.
@@ -488,7 +489,6 @@ export async function setReleaseTime(
   releaseTime: number,
 ): Promise<void> {
   const path = `${V2_BASE}/admin/challs/${encodeURIComponent(challengeId)}`;
-  await request<unknown>(ORIGIN, path);
   await request<unknown>(ORIGIN, path, {
     method: "PUT",
     body: { data: { releaseTime } },

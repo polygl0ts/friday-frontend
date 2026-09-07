@@ -14,6 +14,14 @@ vi.mock("../api/rctf", async (importOriginal) => {
   return { ...actual, listTeamSubmissions: vi.fn() };
 });
 
+// The rows carry a `RevokeSolveButton`, which reads the admin's perms out of
+// context. Nothing here exercises the revoke itself, so this only has to keep
+// the hook from throwing outside a provider - same shape the other admin
+// control tests use.
+vi.mock("../auth/AuthContext", () => ({
+  useAuth: () => ({ isAdmin: true, challsSolveWrite: true }),
+}));
+
 const mockList = vi.mocked(listTeamSubmissions);
 
 function team(over: Partial<RctfAdminUser> = {}): RctfAdminUser {

@@ -11,6 +11,7 @@ import type {
   RctfSubmissionResult,
   RctfSubmissionSortBy,
 } from "../types";
+import { RevokeSolveButton } from "./RevokeSolveButton";
 
 /**
  * One team's submission log - what the team panel's DETAILED button opens.
@@ -322,6 +323,7 @@ export function TeamSubmissionsModal({
                     <span key={column.label}>{column.label}</span>
                   ),
                 )}
+                <span />
               </div>
 
               {rows.map((submission) => {
@@ -374,6 +376,11 @@ export function TeamSubmissionsModal({
                         {payload.text}
                       </span>
                       <span className="sub-ip">{submission.ip}</span>
+
+                      <RevokeSolveButton
+                        challengeId={submission.challengeId}
+                        userId={submission.userId}
+                      />
                     </div>
                     {isOpen && <SubmissionDetail submission={submission} />}
                   </div>

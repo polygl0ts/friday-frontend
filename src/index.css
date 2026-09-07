@@ -939,7 +939,8 @@ a:hover {
 .ban-team,
 .change-tag,
 .change-score,
-.view-submissions {
+.view-submissions,
+.revoke-solve {
   padding: 2px 7px;
   border: 2px solid var(--border);
   background: transparent;
@@ -958,7 +959,8 @@ a:hover {
 .change-score:hover:not(:disabled),
 .change-division:hover:not(:disabled),
 .release-challenge:hover:not(:disabled),
-.view-submissions:hover:not(:disabled) {
+.view-submissions:hover:not(:disabled),
+.revoke-solve:hover:not(:disabled) {
   border-color: var(--red);
   background: var(--red);
   color: #fff;
@@ -969,13 +971,25 @@ a:hover {
 .change-score:disabled,
 .change-division:disabled,
 .release-challenge:disabled,
-.view-submissions:disabled {
+.view-submissions:disabled,
+.revoke-solve:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 .ban-team.banned,
 .hide-challenge.hidden {
   color: var(--red);
+}
+
+.revoke-solve {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  color: var(--red);
+}
+.revoke-solve svg {
+  display: block;
 }
 
 /* ---------- admin: the add-flag control ---------- */
@@ -1700,7 +1714,7 @@ a:hover {
 .table-row.table-subs {
   grid-template-columns:
     minmax(0, 0.95fr) minmax(0, 1.1fr) minmax(0, 0.5fr) minmax(0, 0.8fr)
-    minmax(0, 1.7fr) minmax(0, 0.7fr);
+    minmax(0, 1.7fr) minmax(0, 0.7fr) min-content;
   gap: 12px;
   align-items: start;
   cursor: pointer;
@@ -1716,7 +1730,7 @@ a:hover {
   overflow-x: auto;
 }
 .table-row.table-subs {
-  min-width: 940px;
+  min-width: 980px;
 }
 
 .sub-sort {

@@ -37,6 +37,12 @@ export function canWriteUsers(perms: number | null | undefined): boolean {
 }
 
 /**
+ * rCTF's challsSolveWrite perm bit
+ */
+export function challsSolveWrite(perms: number | null | undefined): boolean {
+  return ((perms ?? 0) & PERM_CHALLS_WRITE) !== 0;
+}
+/**
  * Every bit in rCTF's `perms` bitmask, low to high - mirrors the `Permissions`
  * enum in its types package. All six set is 63, which is what a full admin
  * holds.

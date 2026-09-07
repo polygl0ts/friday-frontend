@@ -137,7 +137,7 @@ export type RctfSubmissionSortBy =
  * `/v2/admin/users` returns them but `RctfAdminUser` does not carry them.
  */
 export interface RctfSubmission {
-  /** The log row's own id. Not a solve id - see `relatedId`. */
+  /** The log row's own id. Not a solve id */
   id: string;
   kind: RctfSubmissionKind;
   challengeId: string;
@@ -153,24 +153,13 @@ export interface RctfSubmission {
   userCountryCode: string | null;
   userStatusText: string | null;
   userBanned: boolean;
-  /** `"unknown"` when rCTF had no address for the request. */
   ip: string;
   result: RctfSubmissionResult;
-  /** On a `cheated` row, the team the flag was issued to. Null otherwise, and
-   *  `cheatedFromName` is null on its own when that team has been deleted. */
   cheatedFromId: string | null;
   cheatedFromName: string | null;
-  /**
-   * Result-specific payload. For a flag submission: `submittedFlag`, plus
-   * `matchedFlagIndex`/`matchedFlagProvider`/`matchedFlagConfig` when one
-   * matched. For an admin-bot job: the `inputs` and the config revision. Empty
-   * for a solve an admin granted by hand - there was no flag to record.
-   */
   details: Record<string, unknown>;
   /** The solve this submission created, or the admin-bot job it queued. */
   relatedId: string | null;
-  /** Parsed to Unix milliseconds by `listTeamSubmissions`; null when rCTF sent
-   *  something unparseable - see `parseRctfTimestamp`. */
   createdAt: number | null;
   /** Exactly what rCTF sent, so an unparseable timestamp can still be shown. */
   createdAtRaw: string;
