@@ -65,7 +65,9 @@ export function Header() {
         ) : (
           <NavLink
             to="/login"
-            className={({ isActive }) => `navlink${isActive ? " active" : ""}`}
+            className={({ isActive }) =>
+              `navlink login-link${isActive ? " active" : ""}`
+            }
           >
             LOGIN
           </NavLink>
