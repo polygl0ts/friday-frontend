@@ -1,4 +1,5 @@
 import type { ChallengeWithMeta } from "../types";
+import { Markdown } from "./Markdown";
 
 export function ChallengeCard({
   chall,
@@ -21,7 +22,9 @@ export function ChallengeCard({
       </div>
 
       <div className="card-name">{chall.name}</div>
-      <div className="card-desc">{chall.description}</div>
+      <div className="card-desc">
+        <Markdown className="card-desc-markdown">{chall.description}</Markdown>
+      </div>
 
       <div className="card-foot">
         <span className={`card-points${chall.solved ? " solved" : ""}`}>

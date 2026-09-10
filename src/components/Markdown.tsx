@@ -3,7 +3,7 @@ import remarkGfm from "remark-gfm";
 import { isSafeUrl } from "../utils";
 
 /**
- * The only place writeup markdown is turned into DOM.
+ * The shared place untrusted markdown is turned into DOM.
  *
  * Writeups are player-authored, so this is the app's untrusted-content
  * boundary.
@@ -14,9 +14,15 @@ import { isSafeUrl } from "../utils";
  * missing a scheme.
  */
 
-export function Markdown({ children }: { children: string }) {
+export function Markdown({
+  children,
+  className,
+}: {
+  children: string;
+  className?: string;
+}) {
   return (
-    <div className="md">
+    <div className={className ? `md ${className}` : "md"}>
       <ReactMarkdown
         skipHtml
         remarkPlugins={[remarkGfm]}

@@ -666,16 +666,15 @@ a:hover {
 .card-desc {
   font-size: 12px;
   line-height: 1.5;
-  color: var(--text-dim);
+  color: var(--text);
   min-height: 40px;
 }
-
 .card-note {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-dimmer);
+  color: var(--text-dim);
   white-space: nowrap;
 }
 
@@ -1564,12 +1563,21 @@ a:hover {
   justify-content: center;
   padding: 40px;
 }
+.challenge-modal-backdrop {
+  padding: 80px 40px 40px;
+}
 .modal {
   width: 560px;
   max-width: 100%;
   border: 3px solid var(--edge);
   background: var(--bg-card);
   box-shadow: var(--shadow-edge);
+}
+.challenge-modal {
+  width: 720px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
 }
 .modal-header {
   display: flex;
@@ -1583,6 +1591,18 @@ a:hover {
 }
 .modal-body {
   padding: 22px;
+}
+.challenge-modal .modal-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+@media (max-width: 700px) {
+  .challenge-modal-backdrop {
+    padding: 72px 16px 16px;
+  }
+  .challenge-modal {
+    max-height: calc(100vh - 88px);
+  }
 }
 .modal-views {
   position: relative;
@@ -2057,6 +2077,46 @@ a:hover {
   border: none;
   border-top: 3px solid var(--border);
   margin: 22px 0;
+}
+
+.card-desc-markdown {
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  max-height: calc(3 * 1.5em);
+  overflow: hidden;
+}
+.card-desc-markdown > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.card-desc-markdown > * + * {
+  margin-top: 0.25em;
+}
+.card-desc-markdown h1,
+.card-desc-markdown h2,
+.card-desc-markdown h3,
+.card-desc-markdown h4 {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+.card-desc-markdown ul,
+.card-desc-markdown ol {
+  padding-left: 18px;
+}
+.card-desc-markdown pre {
+  padding: 4px 6px;
+}
+.card-desc-markdown code,
+.card-desc-markdown pre code {
+  font-size: inherit;
+  line-height: inherit;
+}
+.challenge-description {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
 }
 
 .md-boundary {

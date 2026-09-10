@@ -27,6 +27,18 @@ function renderModal(props: Partial<Parameters<typeof ChallengeModal>[0]> = {}) 
 }
 
 describe("ChallengeModal attachments", () => {
+  it("renders the description as safe markdown", () => {
+    const { container } = renderModal({
+      description: "Decrypt the **flag**.\n\n`xor(key, data)`",
+    });
+
+    expect(container.querySelector("strong")?.textContent).toBe("flag");
+    expect(container.querySelector("code")?.textContent).toBe("xor(key, data)");
+    expect(container.querySelector(".challenge-description")).not.toBeNull();
+    expect(container.querySelector(".challenge-modal")).not.toBeNull();
+    expect(container.querySelector(".challenge-modal-backdrop")).not.toBeNull();
+  });
+
   it("renders a download link per file, resolved against the rCTF origin", () => {
     renderModal({
       files: [

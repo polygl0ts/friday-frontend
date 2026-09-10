@@ -4,6 +4,7 @@ import { challengeFileUrl, getChallengeSolves, submitFlag } from "../api/rctf";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { formatTimestamp } from "../utils";
 import type { RctfChallengeFile } from "../types";
+import { Markdown } from "./Markdown";
 
 export function ChallengeModal({
   challengeId,
@@ -52,8 +53,11 @@ export function ChallengeModal({
   const solved = flagMutation.data?.correct === true;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop challenge-modal-backdrop" onClick={onClose}>
+      <div
+        className="modal challenge-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <div>
             <span
@@ -109,16 +113,13 @@ export function ChallengeModal({
               className={view === "details" ? undefined : "modal-view-hidden"}
               aria-hidden={view !== "details"}
             >
-              <div
-                style={{
-                  fontSize: 13,
-                  color: "var(--text-dim)",
-                  lineHeight: 1.7,
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {description || "No description."}
-              </div>
+              {description ? (
+                <Markdown className="challenge-description">
+                  {description}
+                </Markdown>
+              ) : (
+                <div className="challenge-description">No description.</div>
+              )}
 
               {files.length > 0 && (
                 <div
