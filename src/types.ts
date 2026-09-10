@@ -244,14 +244,22 @@ export interface RctfLeaderboardPoint {
 
 export const TIERS = ["bronze", "silver", "gold"] as const;
 export const ARCHIVED_CATS = ["general", "Lake25", "Lake26"] as const;
+/** The one tag with no subcategory - a challenge is juicer or it is not.
+ *  A list of one, so it spreads into `TAG_OPTIONS` like the other two; `as
+ *  const` is what keeps `JuicerTag` the literal `"juicer"` and not `string`,
+ *  which would widen `TagOption` to `string` and void the whole allowlist. */
+export const JUICER = ["juicer"] as const;
 
 export type Tier = (typeof TIERS)[number];
 export type ArchivedCat = (typeof ARCHIVED_CATS)[number];
-export type TagOption = `tier/${Tier}` | `archived/${ArchivedCat}`;
+export type JuicerTag = (typeof JUICER)[number];
+
+export type TagOption = `tier/${Tier}` | `archived/${ArchivedCat}` | JuicerTag;
 
 export const TAG_OPTIONS: readonly TagOption[] = [
   ...TIERS.map((t) => `tier/${t}` as const),
   ...ARCHIVED_CATS.map((c) => `archived/${c}` as const),
+  ...JUICER,
 ];
 /** Challenge categories supported. */
 export const CATEGORIES = [
@@ -268,6 +276,7 @@ export type Category = (typeof CATEGORIES)[number];
 export interface ChallengeWithMeta extends RctfChallenge {
   tier: Tier | null;
   archived: ArchivedCat | null;
+  juicer: boolean;
   points_current: number;
   solved: boolean;
   solveCount: number;
@@ -342,7 +351,7 @@ export interface Intro2Step {
   challenge_id: string;
   step: number;
   title: string;
-  author: string;  // "" when rCTF has no author on the challenge
+  author: string; // "" when rCTF has no author on the challenge
   description: string;
   status: "done" | "in_progress" | "locked";
   category: string;

@@ -7,6 +7,7 @@ import { AdminChallenges } from "./pages/AdminChallenges";
 import { AdminTeams } from "./pages/AdminTeams";
 import { ArchivedChalls } from "./pages/ArchivedChalls";
 import { Challenges } from "./pages/Challenges";
+import { Juicers } from "./pages/JuicerChallenges";
 import { Home } from "./pages/Home";
 import { Intro2 } from "./pages/Intro2";
 import { Login } from "./pages/Login";
@@ -42,6 +43,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/juicers" element={<Juicers />} />
         <Route
           path="/admin"
           element={

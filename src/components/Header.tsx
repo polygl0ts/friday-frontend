@@ -7,6 +7,7 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/", label: "HOME" },
   { to: "/intro2", label: "INTRO2" },
   { to: "/chall", label: "CHALL" },
+  { to: "/juicers", label: "JUICERS" },
   { to: "/writeups", label: "WRITEUPS" },
   { to: "/archived", label: "ARCHIVED" },
   { to: "/slides", label: "SLIDES" },

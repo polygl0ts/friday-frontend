@@ -3,6 +3,7 @@ import {
   canWriteChalls,
   formatFileSize,
   isAdminPerms,
+  isJuicerFromTag,
   formatTimestamp,
   isSafeUrl,
   orderIntro2Tracks,
@@ -59,6 +60,34 @@ describe("tierFromTags", () => {
     // The challenge repo's schema rejects this, but a challenge edited in
     // rCTF's admin UI can still get here - pick deterministically.
     expect(tierFromTags(["tier/gold", "tier/bronze"])).toBe("gold");
+  });
+});
+
+describe("isJuicerFromTag", () => {
+  it("reads the juicer tag", () => {
+    expect(isJuicerFromTag(["juicer"])).toBe(true);
+  });
+
+  it("finds it next to other tags", () => {
+    expect(isJuicerFromTag(["web", "juicer", "tier/gold"])).toBe(true);
+  });
+
+  it("is false without the tag", () => {
+    expect(isJuicerFromTag(["tier/gold"])).toBe(false);
+    expect(isJuicerFromTag([])).toBe(false);
+  });
+
+  it("survives a missing tag list", () => {
+    expect(isJuicerFromTag(null)).toBe(false);
+    expect(isJuicerFromTag(undefined)).toBe(false);
+  });
+
+  it("is an exact match, like INTRO2 and unlike the prefixed tags", () => {
+    // `juicer` carries no subcategory, so there is nothing after it to parse -
+    // anything longer is a different tag.
+    expect(isJuicerFromTag(["Juicer"])).toBe(false);
+    expect(isJuicerFromTag(["juicer/web"])).toBe(false);
+    expect(isJuicerFromTag(["tier/juicer"])).toBe(false);
   });
 });
 

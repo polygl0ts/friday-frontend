@@ -10,6 +10,7 @@ import {
 // Matches INTRO2_TAG in the backend's app/routers/intro2.py - challenges
 // tagged this way live on the dedicated INTRO2 page
 export const INTRO2_TAG = "intro2";
+export const JUICER_TAG = "juicer";
 
 /**
  * rCTF's `challsRead` bit, as it appears in `/v2/users/me`'s `perms` bitmask.
@@ -118,6 +119,14 @@ export function groupByCategory(
     category,
     challenges: groups.get(category)!,
   }));
+}
+
+/**
+ *  If a challenge is meant to be in the jucer tab or not,
+ * defined by the tag parameter.
+ */
+export function isJuicerFromTag(tags: string[] | null | undefined): boolean {
+  return (tags ?? []).includes(JUICER_TAG);
 }
 
 /**
