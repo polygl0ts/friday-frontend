@@ -9,7 +9,6 @@ import { ArchivedChalls } from "./pages/ArchivedChalls";
 import { Challenges } from "./pages/Challenges";
 import { Juicers } from "./pages/JuicerChallenges";
 import { Home } from "./pages/Home";
-import { Intro2 } from "./pages/Intro2";
 import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
 import { Scoreboard } from "./pages/Scoreboard";
@@ -34,7 +33,6 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/intro2" element={<Intro2 />} />
         <Route path="/chall" element={<Challenges />} />
         <Route path="/writeups" element={<Writeups />} />
         <Route path="/archived" element={<ArchivedChalls />} />

@@ -3,7 +3,7 @@ import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
-import type { ChallengeWithMeta, Category } from "../types";
+import type { ChallengeWithMeta } from "../types";
 import { groupByCategory } from "../utils";
 
 /** Juicer tab, no sub category, only the regular */
