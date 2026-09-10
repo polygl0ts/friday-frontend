@@ -4,23 +4,17 @@ import { ChallengeModal } from "../components/ChallengeModal";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta, Category } from "../types";
-import { DropDownCategory } from "../components/DropDownCategory";
 import { groupByCategory } from "../utils";
 
 /** Juicer tab, no sub category, only the regular */
 export function Juicers() {
   const { isLoggedIn } = useAuth();
-  const [category, setCategory] = useState<Category>("all");
   const [detailsChallenge, setDetailsChallenge] =
     useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();
 
   const groups = groupByCategory(
-    (challengesQuery.data ?? []).filter(
-      (c) =>
-        c.juicer &&
-        (category === "all" || c.category.toLowerCase() === category),
-    ),
+    (challengesQuery.data ?? []).filter((c) => c.juicer),
   );
 
   return (
@@ -38,11 +32,6 @@ export function Juicers() {
         <div>
           <div className="page-title">JUICERS</div>
         </div>
-        {isLoggedIn && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <DropDownCategory value={category} onChange={setCategory} />
-          </div>
-        )}
       </div>
 
       {!isLoggedIn && (
