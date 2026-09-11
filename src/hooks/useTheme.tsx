@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type Theme = "dark" | "light";
+export type Theme = "dark" | "light";
 const THEME_KEY = "polygl0ts_theme";
 
-function stored(): Theme | null { 
+function stored(): Theme | null { 
   const value = localStorage.getItem(THEME_KEY);
-  return(value === "dark" || value === "light")? value : null;
+  return(value === "dark" || value === "light")? value : null;
 }
 
 /*
@@ -41,5 +41,5 @@ export function useTheme() {
     });
   }, []);
 
-  return { theme, toggle };
+  return { theme, toggle };
 }

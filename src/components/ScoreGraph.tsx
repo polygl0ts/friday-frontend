@@ -1,5 +1,5 @@
 import { useAuth } from "../auth/AuthContext";
-import { formatTimestamp } from "../utils"
+import { formatTimestamp } from "../utils"
 import type { RctfLeaderboardPoint } from "../types";
 
 

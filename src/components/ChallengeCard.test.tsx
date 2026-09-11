@@ -11,6 +11,7 @@ function renderCard(description: string) {
     category: "crypto",
     description,
     points: 100,
+    sortWeight: 0,
     tags: ["tier/bronze"],
     solves: 0,
     tier: "bronze",

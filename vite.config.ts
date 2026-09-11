@@ -12,6 +12,9 @@ import react from "@vitejs/plugin-react";
  */
 const rctfUpstream = process.env.DEV_RCTF_ORIGIN;
 const extrasOrigin = process.env.DEV_EXTRAS_ORIGIN ?? "http://localhost:8091";
+const slidesOrigin =
+  process.env.DEV_SLIDES_ORIGIN ??
+  "https://raw.githubusercontent.com/polygl0ts/slides/main";
 
 const rctfProxy = rctfUpstream
   ? // changeOrigin rewrites the Host header, which rCTF's reverse proxy routes on.
@@ -30,7 +33,7 @@ function devRuntimeConfig(): Plugin {
         res.setHeader("Content-Type", "application/json");
         res.setHeader("Cache-Control", "no-store");
         // Empty rctfOrigin: the API clients then build same-origin URLs, hitting the proxy.
-        res.end(JSON.stringify({ rctfOrigin: "", extrasOrigin }));
+        res.end(JSON.stringify({ rctfOrigin: "", extrasOrigin, slidesOrigin }));
       });
     },
   };

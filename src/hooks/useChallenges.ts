@@ -105,10 +105,8 @@ export function useChallenges() {
         ];
       });
 
-      // Same order as the rCTF frontend: sortWeight first, name as tiebreak.
       return withMeta.sort(
-        (a, b) =>
-          a.sortWeight - b.sortWeight || a.name.localeCompare(b.name),
+        (a, b) => a.sortWeight - b.sortWeight || a.name.localeCompare(b.name),
       );
     },
   });

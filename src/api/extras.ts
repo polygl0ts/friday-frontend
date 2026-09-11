@@ -1,13 +1,11 @@
 /**
- * Client for the polygl0ts-extras companion API (writeups, decks, INTRO2,
- * Discord config, admin stats). Endpoint shapes here match
- * exactly - unlike rctf.ts, nothing here is a guess.
+ * Client for the polygl0ts-extras companion API (writeups, INTRO2 (retired),
+ * Discord config, admin stats).
  */
 import { request } from "./client";
 import { extrasOrigin as ORIGIN } from "../config";
 import type {
   AdminStats,
-  Deck,
   DiscordConfig,
   DiscordConfigUpdate,
   DiscordTestResult,
@@ -80,9 +78,6 @@ export const rejectWriteup = (id: number, reason: string) =>
 
 export const deleteWriteup = (id: number) =>
   request<Writeup>(ORIGIN, `/api/writeups/${id}/delete`, { method: "POST" });
-
-export const getDecks = () =>
-  request<Deck[]>(ORIGIN, "/api/decks", { auth: false });
 
 // First bloods are deliberately absent here: rCTF v2 serves them itself on
 // /v2/leaderboard/challs, so the grid reads them from rCTF rather than from a

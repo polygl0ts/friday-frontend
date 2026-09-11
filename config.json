@@ -1,4 +1,5 @@
 {
   "rctfOrigin": "http://localhost:8090",
-  "extrasOrigin": "http://localhost:8091"
+  "extrasOrigin": "http://localhost:8091",
+  "slidesOrigin": "https://raw.githubusercontent.com/polygl0ts/slides/main"
 }

@@ -326,11 +326,12 @@ export interface Writeup {
 }
 
 export interface Deck {
-  id: number;
+  id: string;
   title: string;
-  meta: string;
-  file_url: string;
-  sort_order: number;
+  date: string;
+  file: string;
+  pages: number;
+  size_bytes: number;
 }
 
 /** The single writeup-lifecycle webhook. First bloods are announced by rCTF's

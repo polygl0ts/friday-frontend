@@ -40,7 +40,7 @@ export function ChangeTierButton({
 
   const labels = tags && tags.length > 0 ? tags : ["NONE"];
 
-  if (!canWriteChalls || current === "intro2")
+  if (!canWriteChalls || current === "intro2")
     return (
       <span className="admin-tags">
         {labels.map((label) => (
