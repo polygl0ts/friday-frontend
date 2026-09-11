@@ -454,7 +454,8 @@ a:hover {
   box-shadow: var(--shadow-ctrl);
   transition:
     transform 80ms ease,
-    box-shadow 80ms ease;
+    box-shadow 80ms ease,
+    opacity 120ms ease;
 }
 
 .btn:active:not(:disabled) {
@@ -1626,7 +1627,7 @@ a:hover {
 .modal-confirm {
   width: 440px;
 }
-.modal-confirm .btn:disabled {
+.modal .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
