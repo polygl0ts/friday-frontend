@@ -115,10 +115,9 @@ export function groupByCategory(
     else groups.set(category, [chall]);
   }
 
-  return [...groups.keys()].map((category) => ({
-    category,
-    challenges: groups.get(category)!,
-  }));
+  return ORDERED_CATEGORIES.filter((category) => groups.has(category)).map(
+    (category) => ({ category, challenges: groups.get(category)! }),
+  );
 }
 
 /**

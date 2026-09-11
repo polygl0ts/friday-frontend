@@ -264,10 +264,10 @@ export const TAG_OPTIONS: readonly TagOption[] = [
 ];
 /** Challenge categories supported. */
 export const CATEGORIES = [
-  "rev",
-  "pwn",
   "web",
   "crypto",
+  "rev",
+  "pwn",
   "misc",
   "all",
 ] as const;
