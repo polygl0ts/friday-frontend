@@ -13,6 +13,7 @@ export interface RctfChallenge {
   author: string;
   category: string;
   description: string;
+  sortWeight: number;
   points: number;
   tags?: string[] | null;
   solves?: number;

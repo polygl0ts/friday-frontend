@@ -73,7 +73,7 @@ export function useChallenges() {
         resolveFirstBloods().catch(() => ({}) as Record<string, string>),
       ]);
 
-      return challenges.flatMap((chall): ChallengeWithMeta[] => {
+      const withMeta = challenges.flatMap((chall): ChallengeWithMeta[] => {
         if ((chall.tags ?? []).includes(INTRO2_TAG)) return [];
 
         const tier = tierFromTags(chall.tags);
@@ -104,6 +104,12 @@ export function useChallenges() {
           } satisfies ChallengeWithMeta,
         ];
       });
+
+      // Same order as the rCTF frontend: sortWeight first, name as tiebreak.
+      return withMeta.sort(
+        (a, b) =>
+          a.sortWeight - b.sortWeight || a.name.localeCompare(b.name),
+      );
     },
   });
 }
