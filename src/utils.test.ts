@@ -3,12 +3,14 @@ import {
   canWriteChalls,
   formatFileSize,
   isAdminPerms,
+  isCompleteSheet,
   isJuicerFromTag,
   formatTimestamp,
   isSafeUrl,
   orderIntro2Tracks,
   parseRctfTimestamp,
   resolveFileUrl,
+  sheetScore,
   staticFlag,
   tierFromTags,
 } from "./utils";
@@ -335,5 +337,62 @@ describe("orderIntro2Tracks", () => {
     const tracks = [t("web"), t("rev")];
     orderIntro2Tracks(tracks);
     expect(tracks.map((x) => x.category)).toEqual(["web", "rev"]);
+  });
+});
+
+describe("sheetScore", () => {
+  const scale = { min: 1, max: 5 };
+
+  it("is null for an empty sheet", () => {
+    expect(sheetScore({}, scale)).toBeNull();
+  });
+
+  it("averages rated criteria", () => {
+    expect(sheetScore({ a: 2, b: 4 }, scale)).toBe(3);
+  });
+
+  it("counts a ticked check as max and an unticked one as min", () => {
+    expect(sheetScore({ a: 3, ok: true }, scale)).toBe(4);
+    expect(sheetScore({ a: 3, ok: false }, scale)).toBe(2);
+  });
+});
+
+describe("isCompleteSheet", () => {
+  const criteria = {
+    rated: ["technical", "clarity"],
+    checks: ["format"],
+    min: 1,
+    max: 5,
+  };
+
+  it("accepts a full sheet", () => {
+    expect(
+      isCompleteSheet({ technical: 5, clarity: 1, format: false }, criteria),
+    ).toBe(true);
+  });
+
+  it("rejects a missing or extra key", () => {
+    expect(isCompleteSheet({ technical: 5, clarity: 1 }, criteria)).toBe(false);
+    expect(
+      isCompleteSheet(
+        { technical: 5, clarity: 1, format: true, bonus: 3 },
+        criteria,
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects out-of-range, fractional, or mistyped values", () => {
+    expect(
+      isCompleteSheet({ technical: 6, clarity: 1, format: true }, criteria),
+    ).toBe(false);
+    expect(
+      isCompleteSheet({ technical: 2.5, clarity: 1, format: true }, criteria),
+    ).toBe(false);
+    expect(
+      isCompleteSheet({ technical: true, clarity: 1, format: true }, criteria),
+    ).toBe(false);
+    expect(
+      isCompleteSheet({ technical: 3, clarity: 1, format: 1 }, criteria),
+    ).toBe(false);
   });
 });

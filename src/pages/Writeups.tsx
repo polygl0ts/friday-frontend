@@ -35,8 +35,6 @@ export function Writeups() {
   const needsAttention =
     mineQuery.data?.some((w) => w.status === "rejected") ?? false;
 
-  // Discord's "writeup published" notification deep-links here as
-  // `/writeups?w=<id>`; jump straight to that challenge's writeups.
   const [searchParams, setSearchParams] = useSearchParams();
   const deepLinked = searchParams.get("w");
   useEffect(() => {

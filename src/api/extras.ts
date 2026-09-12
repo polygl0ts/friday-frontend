@@ -9,14 +9,13 @@ import type {
   DiscordConfig,
   DiscordConfigUpdate,
   DiscordTestResult,
+  GradeScores,
+  GradingCriteria,
   Intro2Track,
   Writeup,
   WriteupCard,
   WriteupSort,
 } from "../types";
-
-// No `getMe`: admin status comes off rCTF's `perms` (see auth/AuthContext).
-// The endpoint still exists server-side as an identity echo for debugging.
 
 /** Every published writeup, as bodyless cards - one request for the whole
  *  grid rather than one per challenge. `sort` defaults to newest-first. */
@@ -78,6 +77,15 @@ export const rejectWriteup = (id: number, reason: string) =>
 
 export const deleteWriteup = (id: number) =>
   request<Writeup>(ORIGIN, `/api/writeups/${id}/delete`, { method: "POST" });
+
+export const getGradingCriteria = () =>
+  request<GradingCriteria>(ORIGIN, "/api/writeups/criteria");
+
+export const gradeWriteup = (id: number, scores: GradeScores) =>
+  request<Writeup>(ORIGIN, `/api/writeups/item/${id}/grade`, {
+    method: "PUT",
+    body: { scores },
+  });
 
 // First bloods are deliberately absent here: rCTF v2 serves them itself on
 // /v2/leaderboard/challs, so the grid reads them from rCTF rather than from a

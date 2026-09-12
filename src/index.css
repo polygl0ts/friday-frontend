@@ -2465,3 +2465,50 @@ textarea.md-editor:focus {
 .token-note-warn {
   color: var(--amber);
 }
+
+.grade-writeup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.grade-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.grade-label {
+  min-width: 120px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.grade-options {
+  display: flex;
+  flex-wrap: wrap;
+}
+.grade-options .pill + .pill {
+  margin-left: -3px;
+}
+.grade-submit {
+  align-self: flex-start;
+}
+.grade-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.grade-error {
+  margin: 0;
+  color: var(--red);
+  font-size: 12px;
+}
+
+.writeup-score {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--red);
+  white-space: nowrap;
+}

@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { approveWriteup, getAdminStats, getWriteupQueue, rejectWriteup } from "../api/extras";
+import {
+  approveWriteup,
+  getAdminStats,
+  getWriteupQueue,
+  rejectWriteup,
+} from "../api/extras";
 import { getLeaderboard, listChallenges } from "../api/rctf";
 import { DiscordSettings } from "../components/DiscordSettings";
 import { useChallengeNames } from "../hooks/useChallengeNames";
@@ -15,25 +20,38 @@ import type { Writeup } from "../types";
 export function Admin() {
   const [reviewing, setReviewing] = useState<Writeup | null>(null);
   const queryClient = useQueryClient();
-  // Writeup counts come from extras; players and challenges are rCTF's own
-  // answers, read straight from it - the same two queries the home page runs,
-  // so these tiles keep working even when extras doesn't.
-  const statsQuery = useQuery({ queryKey: ["adminStats"], queryFn: getAdminStats });
-  const playersQuery = useQuery({ queryKey: ["leaderboardTotal"], queryFn: () => getLeaderboard(1) });
-  const challengesQuery = useQuery({ queryKey: ["challengeList"], queryFn: listChallenges });
-  const queueQuery = useQuery({ queryKey: ["writeupQueue"], queryFn: getWriteupQueue });
+  const statsQuery = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: getAdminStats,
+  });
+  const playersQuery = useQuery({
+    queryKey: ["leaderboardTotal"],
+    queryFn: () => getLeaderboard(1),
+  });
+  const challengesQuery = useQuery({
+    queryKey: ["challengeList"],
+    queryFn: listChallenges,
+  });
+  const queueQuery = useQuery({
+    queryKey: ["writeupQueue"],
+    queryFn: getWriteupQueue,
+  });
+
   const challengeName = useChallengeNames();
 
   const invalidateWriteups = () => {
     queryClient.invalidateQueries({ queryKey: ["writeupQueue"] });
     queryClient.invalidateQueries({ queryKey: ["adminStats"] });
   };
-  const approveMutation = useMutation({ mutationFn: approveWriteup, onSuccess: invalidateWriteups });
-  const rejectMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason: string }) => rejectWriteup(id, reason),
+  const approveMutation = useMutation({
+    mutationFn: approveWriteup,
     onSuccess: invalidateWriteups,
   });
-
+  const rejectMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      rejectWriteup(id, reason),
+    onSuccess: invalidateWriteups,
+  });
 
   return (
     <>
@@ -61,22 +79,44 @@ export function Admin() {
           </div>
 
           {queueQuery.isLoading && <div className="loading">Loading...</div>}
-          {queueQuery.data?.length === 0 && <div className="empty-text">Nothing pending.</div>}
+          {queueQuery.data?.length === 0 && (
+            <div className="empty-text">Nothing pending.</div>
+          )}
 
           {queueQuery.data?.map((w) => (
             <div key={w.id} className="panel-row">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <span style={{ fontSize: 13, color: "var(--text)" }}>
-                  {challengeName(w.challenge_id)} <span style={{ color: "var(--text-dimmer)" }}>&middot; {w.team_name}</span>
+                  {challengeName(w.challenge_id)}{" "}
+                  <span style={{ color: "var(--text-dimmer)" }}>
+                    &middot; {w.team_name}
+                  </span>
                 </span>
-                <span style={{ fontSize: 11, color: "var(--amber)" }}>{w.status.toUpperCase()}</span>
+                <span style={{ fontSize: 11, color: "var(--amber)" }}>
+                  {w.status.toUpperCase()}
+                </span>
               </div>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", margin: "10px 0 14px", lineHeight: 1.6 }}>{w.summary}</div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-dim)",
+                  margin: "10px 0 14px",
+                  lineHeight: 1.6,
+                }}
+              >
+                {w.summary}
+              </div>
               <div style={{ display: "flex", gap: 8 }}>
-                {/* Review first: approving publishes the public half to
-                    everyone, so the default action opens the document rather
-                    than acting on a one-line summary. */}
-                <button className="btn btn-small btn-primary" onClick={() => setReviewing(w)}>
+                <button
+                  className="btn btn-small btn-primary"
+                  onClick={() => setReviewing(w)}
+                >
                   REVIEW
                 </button>
                 <button

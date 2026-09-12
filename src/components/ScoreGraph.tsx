@@ -1,12 +1,21 @@
 import { useAuth } from "../auth/AuthContext";
-import { formatTimestamp } from "../utils"
+import { formatTimestamp } from "../utils";
 import type { RctfLeaderboardPoint } from "../types";
 
-
-const SERIES_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#E100FF","#60C757", "#EDDD53"];
+const SERIES_COLORS = [
+  "#3987e5",
+  "#d95926",
+  "#199e70",
+  "#c98500",
+  "#d55181",
+  "#E100FF",
+  "#60C757",
+  "#EDDD53",
+];
 const ME_COLOR = "#ff2b3e";
 
 const WIDTH = 720;
+const PX_PER_DAY = 160;
 const HEIGHT = 250;
 const PAD = 5;
 const PAD_BOTTOM = 40;
@@ -24,94 +33,157 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
   const minScore = Math.min(0, ...allScores);
   const maxScore = Math.max(1, ...allScores);
   const minTime = Math.min(...allTimes);
-  const maxTime = Math.max(minTime + 1, ...allTimes);
+  const lastSolveTimes = series.flatMap((s) =>
+    s.points
+      .filter((p, i) => i > 0 && p.score !== s.points[i - 1].score)
+      .map((p) => p.time),
+  );
+  const maxTime = Math.max(
+    minTime + 1,
+    ...(lastSolveTimes.length > 0 ? lastSolveTimes : allTimes),
+  );
 
-  const x = (t: number) => PAD_LEFT + ((t - minTime) / (maxTime - minTime)) * (WIDTH - PAD_LEFT - PAD);
-  const y = (s: number) => HEIGHT - PAD_BOTTOM  - ((s - minScore) / (maxScore - minScore)) * (HEIGHT - PAD - PAD_BOTTOM);
+  const width = Math.max(
+    WIDTH,
+    Math.ceil(((maxTime - minTime) / 86_400_000) * PX_PER_DAY),
+  );
+  const ticks = Math.max(5, Math.round(width / 180));
+
+  const x = (t: number) =>
+    PAD_LEFT + ((t - minTime) / (maxTime - minTime)) * (width - PAD_LEFT - PAD);
+  const y = (s: number) =>
+    HEIGHT -
+    PAD_BOTTOM -
+    ((s - minScore) / (maxScore - minScore)) * (HEIGHT - PAD - PAD_BOTTOM);
 
   return (
     <div>
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ width: "100%", height: 220 }}>
-
-        {Array.from({ length: 5 }, (_, i) => {
-            const score = minScore + ((maxScore - minScore) *i) / 4;
-            return ( 
+      <div style={{ overflowX: "auto" }}>
+        <svg
+          viewBox={`0 0 ${width} ${HEIGHT}`}
+          style={{ width: width > WIDTH ? width : "100%", height: 220 }}
+        >
+          {Array.from({ length: 5 }, (_, i) => {
+            const score = minScore + ((maxScore - minScore) * i) / 4;
+            return (
               <g key={`grid-${i}`}>
                 <line
                   x1={PAD_LEFT}
                   y1={y(score)}
-                  x2={WIDTH - PAD}
+                  x2={width - PAD}
                   y2={y(score)}
                   stroke="var(--border-dim)"
                   strokeWidth={4}
                   opacity={0.8}
                 />
-                <text x={PAD_LEFT - 6} y={y(score) + 3} textAnchor="end" fontSize={9} fill="var(--text-dim)">
+                <text
+                  x={PAD_LEFT - 6}
+                  y={y(score) + 3}
+                  textAnchor="end"
+                  fontSize={9}
+                  fill="var(--text-dim)"
+                >
                   {Math.round(score)}
                 </text>
-
               </g>
-
             );
-        })}
+          })}
 
-        {Array.from({ length: 5 }, (_, i) => {
-            const t = minTime + ((maxTime - minTime) *i) / 4;
+          {Array.from({ length: ticks }, (_, i) => {
+            const t = minTime + ((maxTime - minTime) * i) / (ticks - 1);
             const time = formatTimestamp(t, true);
             const xLabel = time ? time.split(" ") : ["", ""];
-            return ( 
+            return (
               <text
                 key={`xtick-${i}`}
                 x={x(t)}
                 y={y(0) + 10}
-                textAnchor={i == 0 ? "start" : i === 4 ? "end" : "middle" }
+                textAnchor={
+                  i == 0 ? "start" : i === ticks - 1 ? "end" : "middle"
+                }
                 fontSize={9}
                 fill="var(--text-dim)"
               >
-                <tspan x={x(t)} dy="0">{xLabel[0]}</tspan>
-                <tspan x={x(t)} dy="1.1em">{xLabel[1]}</tspan>
+                <tspan x={x(t)} dy="0">
+                  {xLabel[0]}
+                </tspan>
+                <tspan x={x(t)} dy="1.1em">
+                  {xLabel[1]}
+                </tspan>
               </text>
-
             );
-        })}
+          })}
 
+          {series.map((team, i) => {
+            const isMe = team.id === profile?.id;
+            const color = isMe
+              ? ME_COLOR
+              : SERIES_COLORS[i % SERIES_COLORS.length];
+            const points = team.points;
+            if (points.length === 0) return null;
+            const path = points
+              .map(
+                (p, idx) =>
+                  `${idx === 0 ? "M" : "L"}${x(p.time)},${y(p.score)}`,
+              )
+              .join(" ");
+            const last = points[points.length - 1];
+            return (
+              <g key={team.id}>
+                <path
+                  d={path}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={isMe ? 2.5 : 2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity={isMe ? 1 : 0.85}
+                />
+                <circle
+                  cx={x(last.time)}
+                  cy={y(last.score)}
+                  r={isMe ? 4 : 3}
+                  fill={color}
+                >
+                  <title>
+                    {team.name}: {last.score} pts
+                  </title>
+                </circle>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
 
-
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px 18px",
+          marginTop: 12,
+          fontSize: 11,
+          color: "var(--text-dim)",
+        }}
+      >
         {series.map((team, i) => {
           const isMe = team.id === profile?.id;
-          const color = isMe ? ME_COLOR : SERIES_COLORS[i % SERIES_COLORS.length];
-          const points = team.points;
-          if (points.length === 0) return null;
-          const path = points.map((p, idx) => `${idx === 0 ? "M" : "L"}${x(p.time)},${y(p.score)}`).join(" ");
-          const last = points[points.length - 1];
+          const color = isMe
+            ? ME_COLOR
+            : SERIES_COLORS[i % SERIES_COLORS.length];
           return (
-            <g key={team.id}>
-              <path
-                d={path}
-                fill="none"
-                stroke={color}
-                strokeWidth={isMe ? 2.5 : 2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity={isMe ? 1 : 0.85}
+            <span
+              key={team.id}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
               />
-              <circle cx={x(last.time)} cy={y(last.score)} r={isMe ? 4 : 3} fill={color}>
-                <title>
-                  {team.name}: {last.score} pts
-                </title>
-              </circle>
-            </g>
-          );
-        })}
-      </svg>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px 18px", marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
-        {series.map((team, i) => {
-          const isMe = team.id === profile?.id;
-          const color = isMe ? ME_COLOR : SERIES_COLORS[i % SERIES_COLORS.length];
-          return (
-            <span key={team.id} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: color, display: "inline-block" }} />
               {team.name}
               {isMe && " (you)"}
             </span>

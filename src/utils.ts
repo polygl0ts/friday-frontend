@@ -3,6 +3,8 @@ import {
   type ArchivedCat,
   type Category,
   type ChallengeWithMeta,
+  type GradeScores,
+  type GradingCriteria,
   type RctfFlagEntry,
   type Tier,
 } from "./types";
@@ -363,4 +365,40 @@ const FLAG_RE = /\b(friday|EPFL)\{[^}]{0,200}\}/i;
 
 export function looksLikeFlag(text: string): boolean {
   return FLAG_RE.test(text);
+}
+
+export function sheetScore(
+  scores: GradeScores,
+  { min, max }: Pick<GradingCriteria, "min" | "max">,
+): number | null {
+  const values = Object.values(scores);
+  if (values.length === 0) return null;
+  const total = values.reduce<number>(
+    (sum, value) =>
+      sum + (typeof value === "boolean" ? (value ? max : min) : value),
+    0,
+  );
+  return total / values.length;
+}
+
+export function isCompleteSheet(
+  scores: GradeScores,
+  criteria: GradingCriteria,
+): boolean {
+  const expected = new Set([...criteria.rated, ...criteria.checks]);
+  const keys = Object.keys(scores);
+  if (keys.length !== expected.size || !keys.every((k) => expected.has(k))) {
+    return false;
+  }
+  return (
+    criteria.rated.every((name) => {
+      const v = scores[name];
+      return (
+        typeof v === "number" &&
+        Number.isInteger(v) &&
+        v >= criteria.min &&
+        v <= criteria.max
+      );
+    }) && criteria.checks.every((name) => typeof scores[name] === "boolean")
+  );
 }

@@ -292,17 +292,34 @@ export type WriteupStatus = "pending" | "published" | "rejected";
  *  everyone, and only the body is ever gated. */
 export interface WriteupCard {
   id: number;
-  /** No name: rCTF owns it, and the client already has the challenge list.
-   *  Resolve with `useChallengeNames`. */
   challenge_id: string;
   team_name: string;
   summary: string;
   created_at: string;
   votes: number;
   voted: boolean;
+  /** Mean of every admin's sheet on the rated scale; null until someone
+   *  has graded it. */
+  score: number | null;
+  /** How many admins have graded it. */
+  graders: number;
 }
 
 export type WriteupSort = "new" | "top";
+
+export type GradeScores = Record<string, number | boolean>;
+
+export interface GradingCriteria {
+  rated: string[];
+  checks: string[];
+  min: number;
+  max: number;
+}
+
+export interface WriteupGrade {
+  grader_team_id: string;
+  scores: GradeScores;
+}
 
 export interface Writeup {
   id: number;
@@ -323,6 +340,12 @@ export interface Writeup {
   reject_reason: string | null;
   votes: number;
   voted: boolean;
+  score: number | null;
+  graders: number;
+  /** Admin-only: this admin's own sheet. Null until they grade it. */
+  my_grade: GradeScores | null;
+  /** Admin-only: every sheet on this writeup. Null for non-admins. */
+  grades: WriteupGrade[] | null;
 }
 
 export interface Deck {

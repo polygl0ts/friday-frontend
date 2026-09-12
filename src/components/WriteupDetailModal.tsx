@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getWriteup, getWriteupCards, submitWriteup, updateWriteup } from "../api/extras";
+import {
+  getWriteup,
+  getWriteupCards,
+  submitWriteup,
+  updateWriteup,
+} from "../api/extras";
 import { Markdown } from "./Markdown";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { VoteButton } from "./VoteButton";
@@ -9,6 +14,8 @@ import { useAuth } from "../auth/AuthContext";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { formatTimestamp, isSafeUrl, joinWriteup } from "../utils";
 import type { Writeup, WriteupCard, WriteupSort } from "../types";
+import { GradeWriteup } from "./GradeWriteup";
+import { WriteupScore } from "./WriteupScore";
 
 /**
  * All the writeups for one challenge: read them, and post your own.
@@ -43,10 +50,24 @@ export function WriteupDetailModal({
       <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <span className="heading" style={{ fontSize: 17, color: "var(--text-bright)", fontWeight: 600 }}>
+            <span
+              className="heading"
+              style={{
+                fontSize: 17,
+                color: "var(--text-bright)",
+                fontWeight: 600,
+              }}
+            >
               {challengeName}
             </span>
-            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--red)", marginTop: 6 }}>
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                color: "var(--red)",
+                marginTop: 6,
+              }}
+            >
               {category.toUpperCase()} &middot; WRITEUPS
             </div>
           </div>
@@ -65,9 +86,13 @@ export function WriteupDetailModal({
             <WriteupReader id={openId} onBack={() => setOpenId(null)} />
           ) : (
             <>
-              {cardsQuery.isLoading && <div className="loading">Loading...</div>}
+              {cardsQuery.isLoading && (
+                <div className="loading">Loading...</div>
+              )}
               {cardsQuery.error && (
-                <div className="error-text">{(cardsQuery.error as Error).message}</div>
+                <div className="error-text">
+                  {(cardsQuery.error as Error).message}
+                </div>
               )}
               {cardsQuery.data?.length === 0 && (
                 <div className="empty-text" style={{ padding: "16px 0" }}>
@@ -98,20 +123,42 @@ export function WriteupDetailModal({
                       voted={w.voted}
                       own={w.team_name === profile?.name}
                     />
-                    <button className="writeup-row" onClick={() => setOpenId(w.id)}>
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                        <span style={{ fontSize: 14, color: "var(--text)" }}>{w.team_name}</span>
-                        <span style={{ fontSize: 11, color: "var(--text-dimmer)" }}>
+                    <button
+                      className="writeup-row"
+                      onClick={() => setOpenId(w.id)}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 12,
+                        }}
+                      >
+                        <span style={{ fontSize: 14, color: "var(--text)" }}>
+                          {w.team_name}
+                        </span>
+                        <span
+                          style={{ fontSize: 11, color: "var(--text-dimmer)" }}
+                        >
                           {formatTimestamp(Date.parse(w.created_at)) ?? "-"}
                         </span>
                       </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.65, marginTop: 8 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 12,
+                          fontSize: 12,
+                          color: "var(--text-dim)",
+                          lineHeight: 1.65,
+                          marginTop: 8,
+                        }}
+                      >
                         {w.summary}
+                        <WriteupScore score={w.score} graders={w.graders} />
                       </div>
                     </button>
-                    <DeleteButton
-                      writeupId={w.id}
-                    />
+                    <DeleteButton writeupId={w.id} />
                   </div>
                 ))}
               </div>
@@ -138,18 +185,27 @@ export function WriteupDetailModal({
 }
 
 function WriteupReader({ id, onBack }: { id: number; onBack: () => void }) {
-  const query = useQuery({ queryKey: ["writeup", id], queryFn: () => getWriteup(id) });
+  const query = useQuery({
+    queryKey: ["writeup", id],
+    queryFn: () => getWriteup(id),
+  });
   const { profile } = useAuth();
   const writeup = query.data;
 
   return (
     <>
-      <button className="btn btn-small btn-outline" style={{ marginBottom: 18 }} onClick={onBack}>
+      <button
+        className="btn btn-small btn-outline"
+        style={{ marginBottom: 18 }}
+        onClick={onBack}
+      >
         &#8592; ALL WRITEUPS
       </button>
 
       {query.isLoading && <div className="loading">Loading...</div>}
-      {query.error && <div className="error-text">{(query.error as Error).message}</div>}
+      {query.error && (
+        <div className="error-text">{(query.error as Error).message}</div>
+      )}
 
       {writeup && (
         <>
@@ -162,15 +218,22 @@ function WriteupReader({ id, onBack }: { id: number; onBack: () => void }) {
               marginBottom: 16,
             }}
           >
-            <span className="mono-dim">
-              by {writeup.team_name} &middot; {formatTimestamp(Date.parse(writeup.created_at)) ?? "-"}
+            <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 16 }}>{writeup.summary}</span>
+              <span className="mono-dim">
+                by {writeup.team_name} &middot;{" "}
+                {formatTimestamp(Date.parse(writeup.created_at)) ?? "-"}
+              </span>
             </span>
-            <VoteButton
-              writeupId={writeup.id}
-              votes={writeup.votes}
-              voted={writeup.voted}
-              own={writeup.team_name === profile?.name}
-            />
+            <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <WriteupScore score={writeup.score} graders={writeup.graders} />
+              <VoteButton
+                writeupId={writeup.id}
+                votes={writeup.votes}
+                voted={writeup.voted}
+                own={writeup.team_name === profile?.name}
+              />
+            </span>
           </div>
 
           <Markdown>{writeup.intro_md}</Markdown>
@@ -182,7 +245,12 @@ function WriteupReader({ id, onBack }: { id: number; onBack: () => void }) {
               </div>
               <Markdown>{writeup.solution_md}</Markdown>
               {isSafeUrl(writeup.url) && (
-                <a href={writeup.url} target="_blank" rel="noopener noreferrer nofollow" style={{ fontSize: 12 }}>
+                <a
+                  href={writeup.url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  style={{ fontSize: 12 }}
+                >
                   &#8599; Original writeup
                 </a>
               )}
@@ -190,14 +258,27 @@ function WriteupReader({ id, onBack }: { id: number; onBack: () => void }) {
           ) : (
             <div className="locked-panel">
               <div style={{ fontSize: 22, marginBottom: 10 }}>&#128274;</div>
-              <div className="heading" style={{ fontSize: 15, color: "var(--text-bright)" }}>
+              <div
+                className="heading"
+                style={{ fontSize: 15, color: "var(--text-bright)" }}
+              >
                 The rest is for solvers
               </div>
-              <div className="mono-dim" style={{ marginTop: 8, lineHeight: 1.7 }}>
-                Solve this challenge to unlock the full walkthrough and the exploit.
+              <div
+                className="mono-dim"
+                style={{ marginTop: 8, lineHeight: 1.7 }}
+              >
+                Solve this challenge to unlock the full walkthrough and the
+                exploit.
               </div>
             </div>
           )}
+
+          <GradeWriteup
+            key={writeup.id}
+            writeupId={writeup.id}
+            myGrade={writeup.my_grade}
+          />
         </>
       )}
     </>
@@ -237,13 +318,21 @@ export function WriteupComposer({
     return (
       <div className="center" style={{ padding: "18px 0" }}>
         <div className="check-badge">&#10003;</div>
-        <div className="heading" style={{ fontSize: 18, color: "var(--text-bright)" }}>
+        <div
+          className="heading"
+          style={{ fontSize: 18, color: "var(--text-bright)" }}
+        >
           Submitted for review
         </div>
         <div className="mono-dim" style={{ marginTop: 8, lineHeight: 1.7 }}>
-          Reviewers were pinged on Discord. It stays hidden until an admin approves it.
+          Reviewers were pinged on Discord. It stays hidden until an admin
+          approves it.
         </div>
-        <button className="btn btn-outline" style={{ marginTop: 20 }} onClick={onDone}>
+        <button
+          className="btn btn-outline"
+          style={{ marginTop: 20 }}
+          onClick={onDone}
+        >
           DONE
         </button>
       </div>
@@ -253,7 +342,9 @@ export function WriteupComposer({
   return (
     <>
       <div className="field">
-        <div className="field-label">SUMMARY &middot; SHOWN ON THE CARD, ALWAYS PUBLIC</div>
+        <div className="field-label">
+          SUMMARY &middot; SHOWN ON THE CARD, ALWAYS PUBLIC
+        </div>
         <input
           value={summary}
           maxLength={500}
@@ -264,17 +355,28 @@ export function WriteupComposer({
 
       <div className="field">
         <div className="field-label">WRITEUP</div>
-        <MarkdownEditor value={body} onChange={setBody} disabled={mutation.isPending} />
+        <MarkdownEditor
+          value={body}
+          onChange={setBody}
+          disabled={mutation.isPending}
+        />
       </div>
 
       {mutation.isError && (
-        <div className="error-text" style={{ padding: 0, margin: "12px 0", textAlign: "left" }}>
+        <div
+          className="error-text"
+          style={{ padding: 0, margin: "12px 0", textAlign: "left" }}
+        >
           {(mutation.error as Error).message}
         </div>
       )}
 
       <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-        <button className="btn btn-outline" onClick={onDone} disabled={mutation.isPending}>
+        <button
+          className="btn btn-outline"
+          onClick={onDone}
+          disabled={mutation.isPending}
+        >
           CANCEL
         </button>
         <button
