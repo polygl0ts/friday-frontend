@@ -8,9 +8,12 @@ import { SolveMatrix } from "../components/SolveMatrix";
 /** The tab that asks for no division at all, rather than for one named "". */
 const ALL = "";
 
+const PLAYER_DIVISION = "open";
+
 export function Scoreboard() {
   const { profile, canWriteUsers } = useAuth();
-  const [division, setDivision] = useState(ALL);
+  const [adminDivision, setDivision] = useState(ALL);
+  const division = canWriteUsers ? adminDivision : PLAYER_DIVISION;
 
   const divisionsQuery = useQuery({
     queryKey: ["divisions"],
