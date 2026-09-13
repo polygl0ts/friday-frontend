@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { ResponsiveLine } from "@nivo/line";
 import { useAuth } from "../auth/AuthContext";
 import { formatTimestamp } from "../utils";
 import type { RctfLeaderboardPoint } from "../types";
@@ -14,24 +16,65 @@ const SERIES_COLORS = [
 ];
 const ME_COLOR = "#ff2b3e";
 
-const WIDTH = 720;
-const PX_PER_DAY = 160;
-const HEIGHT = 250;
-const PAD = 5;
-const PAD_BOTTOM = 40;
-const PAD_LEFT = 34;
+const HEIGHT = 300;
+const MAX_TICKS = 8;
+
+type ScoreSeries = { id: string; data: { x: Date; y: number }[] };
+
+/**
+ * One tick per calendar day the graph covers.
+ */
+function dayTicks(minTime: number, maxTime: number): Date[] {
+  const ticks = [new Date(minTime)];
+  const midnight = new Date(minTime);
+  midnight.setHours(24, 0, 0, 0);
+  while (midnight.getTime() <= maxTime) {
+    ticks.push(new Date(midnight));
+    midnight.setHours(24, 0, 0, 0);
+  }
+  const stride = Math.ceil(ticks.length / MAX_TICKS);
+  return stride > 1 ? ticks.filter((_, i) => i % stride === 0) : ticks;
+}
+
+/**
+ * The card colours, read from the stylesheet rather than written twice.
+ */
+function useChartColors() {
+  const read = () => {
+    const style = getComputedStyle(document.documentElement);
+    const value = (name: string, fallback: string) =>
+      style.getPropertyValue(name).trim() || fallback;
+    return {
+      background: value("--bg-card", "#141011"),
+      grid: value("--border-dim", "#2f2729"),
+      text: value("--text-dim", "#9a8f90"),
+      light: document.documentElement.dataset.theme === "light",
+    };
+  };
+
+  const [colors, setColors] = useState(read);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => setColors(read()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return colors;
+}
 
 export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
   const { profile } = useAuth();
+  const colors = useChartColors();
 
   if (series.length === 0) {
     return <div className="empty-text">No score history yet.</div>;
   }
 
-  const allScores = series.flatMap((s) => s.points.map((p) => p.score));
   const allTimes = series.flatMap((s) => s.points.map((p) => p.time));
-  const minScore = Math.min(0, ...allScores);
-  const maxScore = Math.max(1, ...allScores);
   const minTime = Math.min(...allTimes);
   const lastSolveTimes = series.flatMap((s) =>
     s.points
@@ -42,117 +85,104 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
     minTime + 1,
     ...(lastSolveTimes.length > 0 ? lastSolveTimes : allTimes),
   );
+  const ticks = dayTicks(minTime, maxTime);
 
-  const width = Math.max(
-    WIDTH,
-    Math.ceil(((maxTime - minTime) / 86_400_000) * PX_PER_DAY),
-  );
-  const ticks = Math.max(5, Math.round(width / 180));
+  const teams = series.map((team, i) => ({
+    team,
+    color:
+      team.id === profile?.id
+        ? ME_COLOR
+        : SERIES_COLORS[i % SERIES_COLORS.length],
+    isMe: team.id === profile?.id,
+  }));
 
-  const x = (t: number) =>
-    PAD_LEFT + ((t - minTime) / (maxTime - minTime)) * (width - PAD_LEFT - PAD);
-  const y = (s: number) =>
-    HEIGHT -
-    PAD_BOTTOM -
-    ((s - minScore) / (maxScore - minScore)) * (HEIGHT - PAD - PAD_BOTTOM);
+  const data: ScoreSeries[] = teams.map(({ team }) => ({
+    id: team.name,
+    data: team.points
+      .filter((p) => p.time <= maxTime)
+      .map((p) => ({ x: new Date(p.time), y: p.score })),
+  }));
 
   return (
     <div>
-      <div style={{ overflowX: "auto" }}>
-        <svg
-          viewBox={`0 0 ${width} ${HEIGHT}`}
-          style={{ width: width > WIDTH ? width : "100%", height: 220 }}
-        >
-          {Array.from({ length: 5 }, (_, i) => {
-            const score = minScore + ((maxScore - minScore) * i) / 4;
-            return (
-              <g key={`grid-${i}`}>
-                <line
-                  x1={PAD_LEFT}
-                  y1={y(score)}
-                  x2={width - PAD}
-                  y2={y(score)}
-                  stroke="var(--border-dim)"
-                  strokeWidth={4}
-                  opacity={0.8}
-                />
-                <text
-                  x={PAD_LEFT - 6}
-                  y={y(score) + 3}
-                  textAnchor="end"
-                  fontSize={9}
-                  fill="var(--text-dim)"
-                >
-                  {Math.round(score)}
-                </text>
-              </g>
-            );
-          })}
-
-          {Array.from({ length: ticks }, (_, i) => {
-            const t = minTime + ((maxTime - minTime) * i) / (ticks - 1);
-            const time = formatTimestamp(t, true);
-            const xLabel = time ? time.split(" ") : ["", ""];
-            return (
-              <text
-                key={`xtick-${i}`}
-                x={x(t)}
-                y={y(0) + 10}
-                textAnchor={
-                  i == 0 ? "start" : i === ticks - 1 ? "end" : "middle"
-                }
-                fontSize={9}
-                fill="var(--text-dim)"
-              >
-                <tspan x={x(t)} dy="0">
-                  {xLabel[0]}
-                </tspan>
-                <tspan x={x(t)} dy="1.1em">
-                  {xLabel[1]}
-                </tspan>
-              </text>
-            );
-          })}
-
-          {series.map((team, i) => {
-            const isMe = team.id === profile?.id;
-            const color = isMe
-              ? ME_COLOR
-              : SERIES_COLORS[i % SERIES_COLORS.length];
-            const points = team.points;
-            if (points.length === 0) return null;
-            const path = points
-              .map(
-                (p, idx) =>
-                  `${idx === 0 ? "M" : "L"}${x(p.time)},${y(p.score)}`,
-              )
-              .join(" ");
-            const last = points[points.length - 1];
-            return (
-              <g key={team.id}>
-                <path
-                  d={path}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={isMe ? 2.5 : 2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity={isMe ? 1 : 0.85}
-                />
-                <circle
-                  cx={x(last.time)}
-                  cy={y(last.score)}
-                  r={isMe ? 4 : 3}
-                  fill={color}
-                >
-                  <title>
-                    {team.name}: {last.score} pts
-                  </title>
-                </circle>
-              </g>
-            );
-          })}
-        </svg>
+      <div style={{ height: HEIGHT }}>
+        <ResponsiveLine<ScoreSeries>
+          data={data}
+          colors={teams.map((t) => t.color)}
+          margin={{ top: 20, right: 24, bottom: 44, left: 56 }}
+          xScale={{
+            type: "time",
+            format: "native",
+            useUTC: false,
+            min: new Date(minTime),
+            max: new Date(maxTime),
+          }}
+          yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
+          curve="linear"
+          lineWidth={2}
+          axisBottom={{
+            tickSize: 0,
+            tickPadding: 10,
+            tickValues: ticks,
+            format: (value: Date) => formatTimestamp(value.getTime()) ?? "",
+          }}
+          gridXValues={ticks}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 8,
+            tickValues: 5,
+          }}
+          enablePoints={false}
+          enableCrosshair={false}
+          useMesh={true}
+          theme={{
+            background: colors.background,
+            text: { fontSize: 10, fill: colors.text },
+            axis: {
+              domain: { line: { stroke: "transparent" } },
+              ticks: {
+                line: { stroke: "transparent" },
+                text: { fill: colors.text },
+              },
+              legend: { text: { fontSize: 11, fill: colors.text } },
+            },
+            grid: {
+              line: {
+                stroke: colors.grid,
+                strokeWidth: 1,
+                strokeOpacity: colors.light ? 0.18 : 0.8,
+              },
+            },
+          }}
+          tooltip={({ point }) => (
+            <div
+              style={{
+                background: colors.background,
+                border: `1px solid ${colors.grid}`,
+                borderRadius: 6,
+                padding: "6px 9px",
+                fontSize: 11,
+                color: "var(--text)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: point.seriesColor,
+                  display: "inline-block",
+                  marginRight: 6,
+                }}
+              />
+              {point.seriesId}: {point.data.y} pts
+              <div style={{ color: "var(--text-dim)", marginTop: 2 }}>
+                {formatTimestamp(point.data.x.getTime(), true)}
+              </div>
+            </div>
+          )}
+        />
       </div>
 
       <div
@@ -165,30 +195,24 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
           color: "var(--text-dim)",
         }}
       >
-        {series.map((team, i) => {
-          const isMe = team.id === profile?.id;
-          const color = isMe
-            ? ME_COLOR
-            : SERIES_COLORS[i % SERIES_COLORS.length];
-          return (
+        {teams.map(({ team, color, isMe }) => (
+          <span
+            key={team.id}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
             <span
-              key={team.id}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-            >
-              <span
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: color,
-                  display: "inline-block",
-                }}
-              />
-              {team.name}
-              {isMe && " (you)"}
-            </span>
-          );
-        })}
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: color,
+                display: "inline-block",
+              }}
+            />
+            {team.name}
+            {isMe && " (you)"}
+          </span>
+        ))}
       </div>
     </div>
   );
