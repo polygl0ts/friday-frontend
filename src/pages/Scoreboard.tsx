@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLeaderboardWithGraph, listDivisions } from "../api/rctf";
 import { useAuth } from "../auth/AuthContext";
@@ -9,6 +9,7 @@ import { SolveMatrix } from "../components/SolveMatrix";
 const ALL = "";
 
 const PLAYER_DIVISION = "open";
+const CUTOFF_DATE = Date.UTC(2026, 8, 11, 10);
 
 export function Scoreboard() {
   const { profile, canWriteUsers } = useAuth();
@@ -30,11 +31,25 @@ export function Scoreboard() {
   const scope = divisions.find((d) => d.id === division);
   const showTabs = divisions.length > 1;
 
-  const series = (boardQuery.data?.entries ?? [])
+  const entries = useMemo(
+    () =>
+      (boardQuery.data?.entries ?? []).map((entry) => ({
+        ...entry,
+        solves: entry.solves?.filter((s) => s.solveTime >= CUTOFF_DATE),
+      })),
+    [boardQuery.data],
+  );
+
+  const series = entries
     .map((entry) =>
       boardQuery.data?.graph.find((series) => series.id === entry.id),
     )
-    .filter((series) => series !== undefined);
+    .filter((series) => series !== undefined)
+    .map((series) => ({
+      ...series,
+      points: series.points.filter((p) => p.time >= CUTOFF_DATE),
+    }))
+    .filter((series) => series.points.length > 0);
 
   return (
     <div className="page">
@@ -89,7 +104,7 @@ export function Scoreboard() {
             </div>
           )}
 
-          {boardQuery.data?.entries.length === 0 && (
+          {boardQuery.data && entries.length === 0 && (
             <div className="empty-text">
               {scope
                 ? `No team is in ${scope.name} yet.`
@@ -97,7 +112,7 @@ export function Scoreboard() {
             </div>
           )}
 
-          {boardQuery.data && boardQuery.data.entries.length > 0 && (
+          {boardQuery.data && entries.length > 0 && (
             <div className="table">
               <div className="table-row table-head">
                 <span>RANK</span>
@@ -105,7 +120,7 @@ export function Scoreboard() {
                 <span>SOLVES</span>
                 <span style={{ textAlign: "right" }}>POINTS</span>
               </div>
-              {boardQuery.data.entries.map((row, i) => (
+              {entries.map((row, i) => (
                 <div
                   className={`table-row${row.id === profile?.id ? " me" : ""}`}
                   key={row.id}
@@ -151,7 +166,7 @@ export function Scoreboard() {
               >
                 SOLVES BY TEAM
               </div>
-              <SolveMatrix teams={boardQuery.data.entries} />
+              <SolveMatrix teams={entries} />
             </>
           )}
         </>
