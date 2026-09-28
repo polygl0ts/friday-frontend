@@ -11,7 +11,7 @@ export function frameRank(
 
 /**
  * The ASCII frame every challenge surface shares: the title and a figure set
- * into the top rule, a textured background, and the rank's border.
+ * into the top rule, and the rank's border.
  */
 export function AsciiFrame({
   rank,
@@ -53,7 +53,6 @@ export function AsciiFrame({
 
   return (
     <div className={classes} onClick={onClick}>
-      <span className="frame-bg" aria-hidden="true" />
       <span className="frame-flourish left" aria-hidden="true" />
       <span className="frame-flourish right" aria-hidden="true" />
       <div className="rule rule-top">

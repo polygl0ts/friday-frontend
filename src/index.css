@@ -840,7 +840,6 @@ a.b88-img:hover {
 .ascii-frame.rank-silver {
   --r-tl-plain: "|=";
   --r-tr-plain: "=|";
-  --r-bg: var(--gen-stars-a);
   --r-tl: "|=--=[ ";
   --r-name-end: " ]=";
   --r-fill: "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
@@ -1067,12 +1066,6 @@ a.b88-img:hover {
 .scoreboard-frame {
   margin-top: 30px;
 }
-.profile .ascii-frame .frame-bg::before,
-.ascii-frame.auth-frame .frame-bg::before,
-.ascii-frame.home-frame .frame-bg::before,
-.ascii-frame.scoreboard-frame .frame-bg::before {
-  content: none;
-}
 .scoreboard-frame .frame-body {
   padding: 12px 20px 10px;
 }
@@ -1168,9 +1161,6 @@ a.b88-img:hover {
   right: 1ch;
 }
 
-.ascii-frame.rank-juicer.interactive:hover .frame-bg::before {
-  animation: juicer-stars 900ms steps(1) infinite;
-}
 .ascii-frame.rank-juicer.interactive:hover .frame-flourish.left::before {
   animation: juicer-twinkle-l 700ms steps(1) infinite;
 }
@@ -1189,11 +1179,6 @@ a.b88-img:hover {
   animation: rule-spark 1.2s steps(16) infinite reverse;
 }
 
-@keyframes juicer-stars {
-  50% {
-    content: var(--gen-stars-b);
-  }
-}
 @keyframes juicer-twinkle-l {
   50% {
     content: "♦\A╰─◊";
@@ -1277,39 +1262,41 @@ a.b88-img:hover {
   min-height: 0;
   padding: 0 16px 0 22px;
 }
-.ascii-frame .frame-bg::before {
-  content: var(--r-bg);
-  position: absolute;
-  top: 1.7em;
-  bottom: 1.7em;
-  left: 2ch;
-  right: 2ch;
-  overflow: hidden;
-  font-family: "Courier New", Menlo, Consolas, "DejaVu Sans Mono",
-    "Liberation Mono", monospace;
-  font-size: 11px;
-  line-height: 1.25;
-  white-space: pre;
-  color: var(--text-bright);
-  opacity: 0.1;
-  pointer-events: none;
-  user-select: none;
-}
-.ascii-frame.solved .frame-bg::before {
-  color: var(--green);
-}
-.ascii-frame.interactive:hover .frame-bg::before {
-  color: var(--red);
-  opacity: 0.2;
-}
 .chall-card .card-desc-markdown {
   height: calc(3 * 1.5em);
 }
-.ascii-frame.interactive:hover {
-  background: none;
+.ascii-frame.chall-card {
+  --frame-fill: #141414;
+  /* inset to the middle of the drawn border: top rule, bottom rule, side pipes */
+  --fill-top: 12.5px;
+  --fill-bottom: 10.5px;
+  --fill-side: 4px;
+  background: linear-gradient(var(--frame-fill), var(--frame-fill)) no-repeat
+    var(--fill-side) var(--fill-top) /
+    calc(100% - 2 * var(--fill-side)) calc(100% - var(--fill-top) - var(--fill-bottom));
+}
+.chall-card .card-desc.compact {
+  color: #cbc1c2;
+}
+.chall-card .card-meta,
+.chall-card .card-meta.blood {
+  color: var(--text-dim);
+}
+.chall-card .tag-box:not(.accent) {
+  color: #cbc1c2;
+  border-color: #555;
+}
+.ascii-frame.chall-card.rank-juicer {
+  --fill-top: 12px;
+  --fill-bottom: 9px;
+}
+.ascii-frame.chall-card:hover {
+  --frame-fill: #1a1a1a;
 }
 
 .chall-card .card-stats {
+  flex-wrap: nowrap;
+  min-width: 0;
   min-height: 20px;
   margin: 6px 0 6px;
 }
@@ -1365,7 +1352,13 @@ a.b88-img:hover {
   content: var(--r-name-end);
   position: relative;
   z-index: 1;
-  background: var(--bg-frame);
+  background: linear-gradient(
+    var(--bg-frame) var(--fill-split, 100%),
+    var(--frame-fill, var(--bg-frame)) var(--fill-split, 100%)
+  );
+}
+.ascii-frame.chall-card .rule-top {
+  --fill-split: 50%;
 }
 .rule-fill::after {
   content: var(--r-fill);
@@ -1431,7 +1424,6 @@ a.b88-img:hover {
   .ascii-frame.rank-juicer.interactive:hover .rule-bottom .rule-fill::after,
   .ascii-frame.rank-juicer.interactive:hover::before,
   .ascii-frame.rank-juicer.interactive:hover::after,
-  .ascii-frame.rank-juicer.interactive:hover .frame-bg::before,
   .ascii-frame.rank-juicer.interactive:hover .frame-flourish.left::before,
   .ascii-frame.rank-juicer.interactive:hover .frame-flourish.right::before {
     animation: none;
@@ -1473,7 +1465,7 @@ a.b88-img:hover {
 }
 .card-desc.compact {
   min-height: 0;
-  color: var(--text-dimmer);
+  color: var(--text-dim);
 }
 .card-desc.compact :is(a, code, strong, em) {
   color: inherit;
@@ -1498,7 +1490,19 @@ a.b88-img:hover {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   margin-left: auto;
+}
+.chall-card .card-stats > .tag-box,
+.card-stats-end > :not(.blood) {
+  flex: none;
+}
+.card-stats-end > .blood {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-points {
