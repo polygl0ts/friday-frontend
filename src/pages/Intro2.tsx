@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { orderIntro2Tracks } from "../utils";
 import type { Intro2Step } from "../types";
+import { PageNote } from "../components/PageNote";
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   done: { label: "✓ DONE", color: "var(--green)" },
@@ -111,13 +112,7 @@ export function Intro2() {
 
   return (
     <div className="page">
-      <div className="page-title">
-        INTRO2 <span style={{ color: "var(--red)" }}>&middot;</span> LEARNING
-        TRACK
-      </div>
-      <div className="page-subtitle">
-        GUIDED CHALLENGES &middot; NO SCORE PRESSURE
-      </div>
+      <PageNote page="intro2" />
 
       {!isLoggedIn && (
         <div className="empty-text">Log in to track your INTRO2 progress.</div>

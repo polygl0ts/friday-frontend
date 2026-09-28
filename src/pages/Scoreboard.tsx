@@ -53,8 +53,6 @@ export function Scoreboard() {
 
   return (
     <div className="page">
-      <div className="page-title">SCOREBOARD</div>
-      <div className="page-subtitle">TOP PLAYERS</div>
       {!profile && (
         <div className="empty-text">Log in to view the scoreboard.</div>
       )}
@@ -86,8 +84,7 @@ export function Scoreboard() {
 
           <div
             style={{
-              border: "1px solid var(--border-dim)",
-              borderRadius: 12,
+              border: "1px solid var(--border)",
               margin: "30px 0",
               padding: 20,
               background: "var(--bg-card)",

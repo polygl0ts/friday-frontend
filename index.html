@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=VT323&display=swap"
       rel="stylesheet"
     />
     <title>POLYGL0TS//CTF</title>
@@ -15,5 +15,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // the cat only turns up on one visit in twenty
+      if (Math.random() < 0.05) {
+        const neko = document.createElement("script");
+        neko.src = "/oneko/oneko.js";
+        neko.dataset.cat = "/oneko/oneko.gif";
+        document.body.appendChild(neko);
+      }
+    </script>
   </body>
 </html>

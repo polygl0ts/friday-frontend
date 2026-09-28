@@ -159,7 +159,6 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
               style={{
                 background: colors.background,
                 border: `1px solid ${colors.grid}`,
-                borderRadius: 6,
                 padding: "6px 9px",
                 fontSize: 11,
                 color: "var(--text)",
@@ -170,7 +169,6 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
                 style={{
                   width: 8,
                   height: 8,
-                  borderRadius: "50%",
                   background: point.seriesColor,
                   display: "inline-block",
                   marginRight: 6,
@@ -204,7 +202,6 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
               style={{
                 width: 10,
                 height: 10,
-                borderRadius: "50%",
                 background: color,
                 display: "inline-block",
               }}

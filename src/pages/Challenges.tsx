@@ -6,14 +6,9 @@ import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta, Tier, Category } from "../types";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { groupByCategory } from "../utils";
+import { PageNote } from "../components/PageNote";
 
 const TIERS: Tier[] = ["bronze", "silver", "gold"];
-const TIER_META: Record<Tier, string> = {
-  bronze: "BRONZE TIER · START HERE",
-  silver: "SILVER TIER · SOME EXPERIENCE ASSUMED",
-  gold: "GOLD TIER · THE HARD ONES",
-};
-
 export function Challenges() {
   const { isLoggedIn } = useAuth();
   const [tier, setTier] = useState<Tier>("bronze");
@@ -35,7 +30,7 @@ export function Challenges() {
       <div
         style={{
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "flex-start",
           justifyContent: "space-between",
           marginBottom: 26,
           flexWrap: "wrap",
@@ -43,8 +38,7 @@ export function Challenges() {
         }}
       >
         <div>
-          <div className="page-title">CHALLENGES</div>
-          <div className="page-subtitle">{TIER_META[tier]}</div>
+          <PageNote page="chall" />
         </div>
         {isLoggedIn && (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

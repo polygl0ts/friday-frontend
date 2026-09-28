@@ -33,8 +33,8 @@ describe("AdminLayout", () => {
     renderAt("/admin/challs");
 
     expect(screen.getByText("challenges panel")).toBeTruthy();
-    // One title for the whole section, owned by the layout - not one per panel.
-    expect(screen.getAllByText("ADMIN")).toHaveLength(1);
+    // One badge for the whole section, owned by the layout - not one per panel.
+    expect(screen.getAllByText(/CONTROL/)).toHaveLength(1);
   });
 
   it("marks only the panel that is open", () => {

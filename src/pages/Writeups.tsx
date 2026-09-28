@@ -11,6 +11,7 @@ import { useWriteupCards } from "../hooks/useWriteups";
 import type { Category, ChallengeWithMeta, Tier } from "../types";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { groupByCategory } from "../utils";
+import { PageNote } from "../components/PageNote";
 
 /** The three tiers browse *other people's* writeups; "mine" is a different
  *  axis entirely, which is why it sits in its own group in the tab bar. */
@@ -58,17 +59,12 @@ export function Writeups() {
   );
   const cardsFor = (id: string) => cardsQuery.data?.[id] ?? [];
   const groups = groupByCategory(filtered);
-  const total = groups.reduce(
-    (sum, group) =>
-      sum + group.challenges.reduce((n, c) => n + cardsFor(c.id).length, 0),
-    0,
-  );
   return (
     <div className="page">
       <div
         style={{
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "flex-start",
           justifyContent: "space-between",
           marginBottom: 26,
           flexWrap: "wrap",
@@ -76,13 +72,7 @@ export function Writeups() {
         }}
       >
         <div>
-          <div className="page-title">WRITEUPS</div>
-          <div className="page-subtitle">
-            {isLoggedIn && tier !== "mine" && `${total} PUBLISHED`}
-            {isLoggedIn &&
-              tier === "mine" &&
-              "YOUR SUBMISSIONS AND THEIR REVIEW STATUS"}
-          </div>
+          <PageNote page="writeups" />
         </div>
         {isLoggedIn && (
           <div className="tab-bar">

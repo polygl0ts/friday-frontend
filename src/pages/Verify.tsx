@@ -82,10 +82,10 @@ export function Verify() {
           width: 460,
           maxWidth: "100%",
           border: "1px solid var(--border)",
-          borderRadius: 14,
           background: "var(--bg-card-alt)",
-          padding: 38,
-          boxShadow: "0 30px 80px rgba(0,0,0,.6)",
+          padding: 30,
+          outline: "1px solid var(--border-dim)",
+          outlineOffset: 4,
         }}
       >
         {infoQuery.isLoading && <div className="loading">Checking your link...</div>}

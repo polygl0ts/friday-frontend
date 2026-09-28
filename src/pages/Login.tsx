@@ -49,10 +49,10 @@ export function Login() {
           width: 420,
           maxWidth: "100%",
           border: "1px solid var(--border)",
-          borderRadius: 14,
           background: "var(--bg-card-alt)",
-          padding: 38,
-          boxShadow: "0 30px 80px rgba(0,0,0,.6)",
+          padding: 30,
+          outline: "1px solid var(--border-dim)",
+          outlineOffset: 4,
         }}
       >
         <div style={{ display: "flex", gap: 8, marginBottom: 30 }}>

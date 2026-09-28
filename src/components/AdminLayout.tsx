@@ -18,7 +18,6 @@ export function AdminLayout() {
   return (
     <div className="page">
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <div className="page-title">ADMIN</div>
         <span className="admin-badge">rCTF &middot; CONTROL</span>
       </div>
 

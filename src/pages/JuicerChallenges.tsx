@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta } from "../types";
 import { groupByCategory } from "../utils";
+import { PageNote } from "../components/PageNote";
 
 /** Juicer tab, no sub category, only the regular */
 export function Juicers() {
@@ -30,7 +31,7 @@ export function Juicers() {
         }}
       >
         <div>
-          <div className="page-title">JUICERS</div>
+          <PageNote page="juicers" />
         </div>
       </div>
 

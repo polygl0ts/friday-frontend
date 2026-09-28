@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { deckUrl, getDecks, recordingUrl } from "../api/slides";
 import { formatFileSize } from "../utils";
 import type { Deck } from "../types";
+import { PageNote } from "../components/PageNote";
 
 const CARD_STYLE = {
-  border: "1px solid var(--border-dim)",
-  borderRadius: 10,
+  border: "1px solid var(--border)",
   padding: 14,
   background: "var(--bg-card)",
 } as const;
@@ -115,10 +115,7 @@ export function Slides() {
 
   return (
     <div className="page">
-      <div className="page-title">
-        SLIDES <span style={{ color: "var(--red)" }}>&middot;</span> DECKS
-      </div>
-      <div className="page-subtitle">WORKSHOP &amp; BRIEFING PRESENTATIONS</div>
+      <PageNote page="slides" />
 
       {decksQuery.isLoading && <div className="loading">Loading...</div>}
       {decksQuery.error && (

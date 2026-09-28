@@ -11,6 +11,7 @@ import {
   type ChallengeWithMeta,
 } from "../types";
 import { groupByCategory } from "../utils";
+import { PageNote } from "../components/PageNote";
 
 const TIER_META: Record<ArchivedCat, string> = {
   general: "GENERAL",
@@ -42,7 +43,7 @@ export function ArchivedChalls() {
       <div
         style={{
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "flex-start",
           justifyContent: "space-between",
           marginBottom: 26,
           flexWrap: "wrap",
@@ -50,8 +51,7 @@ export function ArchivedChalls() {
         }}
       >
         <div>
-          <div className="page-title">CHALLENGES</div>
-          <div className="page-subtitle">{TIER_META[archivedCategory]}</div>
+          <PageNote page="archived" />
         </div>
         {isLoggedIn && (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

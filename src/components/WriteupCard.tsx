@@ -2,8 +2,8 @@ import type { ChallengeWithMeta, WriteupCard as Card } from "../types";
 
 /**
  * One challenge's writeups, shaped like the challenge grid's card so the two
- * pages read as the same system - same slab frame, same offset shadow, same
- * boxed category label.
+ * pages read as the same system - same frame, same stats row, same boxed
+ * category label.
  */
 export function WriteupCard({
   chall,
@@ -24,36 +24,35 @@ export function WriteupCard({
       onClick={onOpen}
       style={{ cursor: "pointer", opacity: empty ? 0.72 : 1 }}
     >
-      <div className="card-top">
+      <div className="card-stats">
         <span className={`tag-box${chall.solved ? " accent" : ""}`}>
           {chall.category.toUpperCase()}
         </span>
-        {chall.solved ? (
-          <span className="card-solved">[&#10003; SOLVED]</span>
-        ) : (
-          !empty && (
-            <span className="card-note" title="Solve it to read the full solutions">
-              PARTIALLY HIDDEN
-            </span>
-          )
-        )}
-      </div>
-
-      <div className="card-name">{chall.name}</div>
-
-      <div className="card-note">
-        {latest ? `LATEST BY ${latest.team_name.toUpperCase()}` : "NO WRITEUPS YET"}
-      </div>
-      <div className="card-desc" style={{ marginTop: 8 }}>
-        {latest ? latest.summary : chall.solved ? "Be the first to post one." : "Nothing published yet."}
-      </div>
-
-      <div className="card-foot">
         <span className="card-count" style={{ color: empty ? "var(--text-dim)" : "var(--red)" }}>
           {cards.length} WRITEUP{cards.length === 1 ? "" : "S"}
-          {votes > 0 && <span style={{ color: "var(--text-dim)" }}> &middot; &#9650; {votes}</span>}
         </span>
-        <span className="card-read">READ &rarr;</span>
+        {votes > 0 && <span className="card-meta">&#9650; {votes}</span>}
+        <span className="card-note">
+          {latest ? `LATEST BY ${latest.team_name.toUpperCase()}` : "NO WRITEUPS YET"}
+        </span>
+      </div>
+
+      <div className="card-title-row">
+        <div className="card-name">{chall.name}</div>
+        <span className="card-title-side">
+          {chall.solved ? (
+            <span className="card-solved">[&#10003; SOLVED]</span>
+          ) : (
+            !empty && (
+              <span className="card-note" title="Solve it to read the full solutions">
+                PARTIALLY HIDDEN
+              </span>
+            )
+          )}
+        </span>
+      </div>
+      <div className="card-desc compact">
+        {latest ? latest.summary : chall.solved ? "Be the first to post one." : "Nothing published yet."}
       </div>
     </div>
   );

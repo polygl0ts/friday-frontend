@@ -17,7 +17,7 @@ export function Profile() {
 
   return (
     <div className="page">
-      <div style={{ display: "flex", alignItems: "center", gap: 22, border: "1px solid var(--border)", borderRadius: 14, padding: 30, background: "var(--bg-card-alt)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 22, border: "1px solid var(--border)", padding: 30, background: "var(--bg-card-alt)" }}>
         <AvatarPicker url={profile?.avatarUrl ?? null} teamName={profile?.name ?? "your team"} />
         <div style={{ flex: 1 }}>
           <div className="heading" style={{ fontSize: 28, color: "var(--text-bright)", fontWeight: 600 }}>
@@ -28,7 +28,7 @@ export function Profile() {
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 34, fontWeight: 800, color: "var(--red)", textShadow: "0 0 16px rgba(255,43,62,.5)" }}>
+          <div style={{ fontSize: 34, fontWeight: 800, color: "var(--red)" }}>
             {profile?.score ?? 0}
           </div>
           <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "var(--text-dimmer)" }}>TOTAL POINTS</div>
@@ -48,7 +48,7 @@ export function Profile() {
       {profile?.teamToken && <TeamToken token={profile.teamToken} />}
 
       <div className="grid grid-2" style={{ marginTop: 24 }}>
-        <div style={{ border: "1px solid var(--border)", borderRadius: 12, background: "var(--bg-card-alt)", padding: 24 }}>
+        <div style={{ border: "1px solid var(--border)", background: "var(--bg-card-alt)", padding: 24 }}>
           <div className="heading" style={{ fontSize: 14, color: "var(--text-bright)", fontWeight: 600, marginBottom: 18 }}>
             SOLVED BY CATEGORY
           </div>
