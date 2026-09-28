@@ -4,7 +4,7 @@ import { challengeFileUrl, getChallengeSolves, submitFlag } from "../api/rctf";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { formatTimestamp } from "../utils";
+import { formatFileSize, formatTimestamp } from "../utils";
 import type { RctfChallengeFile } from "../types";
 import { AsciiFrame, type FrameRank } from "./AsciiFrame";
 import { Markdown } from "./Markdown";
@@ -130,6 +130,7 @@ export function ChallengeModal({
                       {files.map((file) => {
                         const href = challengeFileUrl(file.url);
                         if (!href) return null;
+                        const size = formatFileSize(file.size);
                         return (
                           <a
                             key={`${file.url}:${file.name}`}
@@ -142,6 +143,7 @@ export function ChallengeModal({
                             <span style={{ color: "var(--text)" }}>
                               {file.name}
                             </span>
+                            {size && <span className="chip-size">{size}</span>}
                           </a>
                         );
                       })}

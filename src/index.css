@@ -2822,6 +2822,10 @@ a.b88-img:hover {
   padding: 2px 8px;
 }
 
+.chip-size {
+  color: var(--text-dimmer);
+  font-weight: 400;
+}
 .chip:hover:not(:disabled) {
   border-color: var(--red);
   color: var(--red);

@@ -252,6 +252,12 @@ export function TeamSubmissionsModal({
 
         <div className="sub-facts">
           <span className="chip chip-tag">{division || "no division"}</span>
+          {sample?.userCountryCode && (
+            <span className="chip chip-tag">{sample.userCountryCode}</span>
+          )}
+          {sample?.userStatusText && (
+            <span className="chip chip-tag">{sample.userStatusText}</span>
+          )}
           {banned && (
             <span className="chip chip-tag sub-chip-alarm">BANNED</span>
           )}
