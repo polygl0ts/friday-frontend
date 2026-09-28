@@ -1067,6 +1067,7 @@ a.b88-img:hover {
 .scoreboard-frame {
   margin-top: 30px;
 }
+.profile .ascii-frame .frame-bg::before,
 .ascii-frame.home-frame .frame-bg::before,
 .ascii-frame.scoreboard-frame .frame-bg::before {
   content: none;
