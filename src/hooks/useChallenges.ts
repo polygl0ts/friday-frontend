@@ -51,7 +51,7 @@ async function resolveFirstBloods(): Promise<Record<string, string>> {
 }
 
 export function useChallenges() {
-  const { profile, isLoggedIn } = useAuth();
+  const { profile } = useAuth();
   const solves = profile?.solves ?? [];
   const solvedIds = new Set(solves.map((s) => s.id));
   const myBloods = new Set(
@@ -65,7 +65,6 @@ export function useChallenges() {
       [...solvedIds].sort().join(","),
       [...myBloods].sort().join(","),
     ],
-    enabled: isLoggedIn,
     queryFn: async () => {
       const [challenges, firstBloods] = await Promise.all([
         listChallenges(),

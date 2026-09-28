@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { frameRank } from "../components/AsciiFrame";
-import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta, Tier, Category } from "../types";
 import { useStoredTier } from "../hooks/useStoredTier";
@@ -12,7 +11,6 @@ import { PageNote } from "../components/PageNote";
 
 const TIERS: Tier[] = ["bronze", "silver", "gold"];
 export function Challenges() {
-  const { isLoggedIn } = useAuth();
   const [tier, setTier] = useStoredTier();
   const [category, setCategory] = useState<Category>("all");
   const [detailsChallenge, setDetailsChallenge] =
@@ -42,29 +40,23 @@ export function Challenges() {
         <div>
           <PageNote page="chall" />
         </div>
-        {isLoggedIn && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <DropDownCategory value={category} onChange={setCategory} />
-            <div className="tier-tabs">
-              {TIERS.map((t) => (
-                <button
-                  key={t}
-                  className={`pill${tier === t ? " active" : ""}`}
-                  onClick={() => setTier(t)}
-                >
-                  {t.toUpperCase()}
-                </button>
-              ))}
-            </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <DropDownCategory value={category} onChange={setCategory} />
+          <div className="tier-tabs">
+            {TIERS.map((t) => (
+              <button
+                key={t}
+                className={`pill${tier === t ? " active" : ""}`}
+                onClick={() => setTier(t)}
+              >
+                {t.toUpperCase()}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
-      {!isLoggedIn && (
-        <div className="empty-text">Log in to view the challenges.</div>
-      )}
-
-      {isLoggedIn && challengesQuery.isLoading && (
+      {challengesQuery.isLoading && (
         <div className="loading">Loading challenges...</div>
       )}
       {challengesQuery.error && (
@@ -82,9 +74,7 @@ export function Challenges() {
           className={`category-section${index > 0 ? " category-section-split" : ""}`}
         >
           <div className="category-heading">
-            <span className="category-heading-name">
-              {group.category}
-            </span>
+            <span className="category-heading-name">{group.category}</span>
           </div>
           <div className="grid grid-3">
             {group.challenges.map((chall) => (

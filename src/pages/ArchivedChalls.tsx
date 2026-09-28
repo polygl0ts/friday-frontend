@@ -3,7 +3,6 @@ import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { frameRank } from "../components/AsciiFrame";
 import { DropDownCategory } from "../components/DropDownCategory";
-import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import {
   ARCHIVED_CATS,
@@ -24,7 +23,6 @@ const TIER_META: Record<ArchivedCat, string> = {
  * Both of which are mutable.
  */
 export function ArchivedChalls() {
-  const { isLoggedIn } = useAuth();
   const [archivedCategory, setTier] = useState<ArchivedCat>("general");
   const [category, setCategory] = useState<Category>("all");
   const [detailsChallenge, setDetailsChallenge] =
@@ -54,29 +52,23 @@ export function ArchivedChalls() {
         <div>
           <PageNote page="archived" />
         </div>
-        {isLoggedIn && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <DropDownCategory value={category} onChange={setCategory} />
-            <div className="tier-tabs">
-              {ARCHIVED_CATS.map((t) => (
-                <button
-                  key={t}
-                  className={`pill${archivedCategory === t ? " active" : ""}`}
-                  onClick={() => setTier(t)}
-                >
-                  {TIER_META[t]}
-                </button>
-              ))}
-            </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <DropDownCategory value={category} onChange={setCategory} />
+          <div className="tier-tabs">
+            {ARCHIVED_CATS.map((t) => (
+              <button
+                key={t}
+                className={`pill${archivedCategory === t ? " active" : ""}`}
+                onClick={() => setTier(t)}
+              >
+                {TIER_META[t]}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
-      {!isLoggedIn && (
-        <div className="empty-text">Log in to view the challenges.</div>
-      )}
-
-      {isLoggedIn && challengesQuery.isLoading && (
+      {challengesQuery.isLoading && (
         <div className="loading">Loading challenges...</div>
       )}
       {challengesQuery.error && (
@@ -93,9 +85,7 @@ export function ArchivedChalls() {
           className={`category-section${index > 0 ? " category-section-split" : ""}`}
         >
           <div className="category-heading">
-            <span className="category-heading-name">
-              {group.category}
-            </span>
+            <span className="category-heading-name">{group.category}</span>
           </div>
           <div className="grid grid-3">
             {group.challenges.map((chall) => (

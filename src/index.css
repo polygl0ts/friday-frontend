@@ -1068,6 +1068,7 @@ a.b88-img:hover {
   margin-top: 30px;
 }
 .profile .ascii-frame .frame-bg::before,
+.ascii-frame.auth-frame .frame-bg::before,
 .ascii-frame.home-frame .frame-bg::before,
 .ascii-frame.scoreboard-frame .frame-bg::before {
   content: none;
@@ -1083,6 +1084,15 @@ a.b88-img:hover {
   color: var(--text-dimmer);
   background: none;
   border-bottom: 1px solid var(--border);
+}
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding-top: 70px;
+  padding-bottom: 110px;
+}
+.auth-frame .frame-body {
+  padding: 22px 30px 18px;
 }
 .deck-row {
   display: flex;

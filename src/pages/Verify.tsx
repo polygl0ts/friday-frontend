@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getVerifyInfo, verify } from "../api/rctf";
 import { useAuth } from "../auth/AuthContext";
 import type { VerifyKind } from "../api/rctf";
+import { AsciiFrame } from "../components/AsciiFrame";
 
 /**
  * The landing page for an emailed verification link.
@@ -18,7 +19,10 @@ import type { VerifyKind } from "../api/rctf";
  * without marking it used, so this page can say what is about to happen.
  */
 
-const COPY: Record<VerifyKind, { title: string; action: string; describe: (i: Info) => string }> = {
+const COPY: Record<
+  VerifyKind,
+  { title: string; action: string; describe: (i: Info) => string }
+> = {
   register: {
     title: "Finish creating your team",
     action: "CREATE TEAM →",
@@ -34,7 +38,9 @@ const COPY: Record<VerifyKind, { title: string; action: string; describe: (i: In
     title: "Confirm your new email",
     action: "CONFIRM EMAIL →",
     describe: (i) =>
-      i.email ? `This sets your account email to ${i.email}.` : "This updates your account email.",
+      i.email
+        ? `This sets your account email to ${i.email}.`
+        : "This updates your account email.",
   },
 };
 
@@ -76,59 +82,64 @@ export function Verify() {
   const copy = info ? COPY[info.kind] : null;
 
   return (
-    <div className="page" style={{ display: "flex", justifyContent: "center", paddingTop: 90 }}>
-      <div
-        style={{
-          width: 460,
-          maxWidth: "100%",
-          border: "1px solid var(--border)",
-          background: "var(--bg-card-alt)",
-          padding: 30,
-          outline: "1px solid var(--border-dim)",
-          outlineOffset: 4,
-        }}
-      >
-        {infoQuery.isLoading && <div className="loading">Checking your link...</div>}
+    <div className="page auth-page">
+      <AsciiFrame rank="silver" title={"verify"} className="auth-frame">
+        <div style={{ width: 420, maxWidth: "100%" }}>
+          {infoQuery.isLoading && (
+            <div className="loading">Checking your link...</div>
+          )}
 
-        {!infoQuery.isLoading && (
-          <>
-            <div
-              className="heading"
-              style={{ fontSize: 24, color: "var(--text-bright)", fontWeight: 600 }}
-            >
-              {copy?.title ?? "Confirm"}
-            </div>
-
-            <div className="mono-dim" style={{ marginTop: 8, lineHeight: 1.6 }}>
-              {info && copy
-                ? copy.describe(info)
-                : "We couldn't read this link ahead of time. You can still submit it, or request a new one from the login page."}
-            </div>
-
-            {confirmMutation.isError && (
+          {!infoQuery.isLoading && (
+            <>
               <div
-                className="error-text"
-                style={{ padding: 0, marginTop: 18, textAlign: "left" }}
+                className="heading"
+                style={{
+                  fontSize: 24,
+                  color: "var(--text-bright)",
+                  fontWeight: 600,
+                }}
               >
-                {(confirmMutation.error as Error).message}
+                {copy?.title ?? "Confirm"}
               </div>
-            )}
 
-            <button
-              className="btn btn-primary"
-              style={{ width: "100%", marginTop: 26 }}
-              disabled={confirmMutation.isPending || confirmMutation.isSuccess}
-              onClick={() => confirmMutation.mutate()}
-            >
-              {confirmMutation.isPending ? "VERIFYING..." : (copy?.action ?? "CONTINUE →")}
-            </button>
+              <div
+                className="mono-dim"
+                style={{ marginTop: 8, lineHeight: 1.6 }}
+              >
+                {info && copy
+                  ? copy.describe(info)
+                  : "We couldn't read this link ahead of time. You can still submit it, or request a new one from the login page."}
+              </div>
 
-            <div className="token-note" style={{ marginTop: 14 }}>
-              This link works once.
-            </div>
-          </>
-        )}
-      </div>
+              {confirmMutation.isError && (
+                <div
+                  className="error-text"
+                  style={{ padding: 0, marginTop: 18, textAlign: "left" }}
+                >
+                  {(confirmMutation.error as Error).message}
+                </div>
+              )}
+
+              <button
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: 26 }}
+                disabled={
+                  confirmMutation.isPending || confirmMutation.isSuccess
+                }
+                onClick={() => confirmMutation.mutate()}
+              >
+                {confirmMutation.isPending
+                  ? "VERIFYING..."
+                  : (copy?.action ?? "CONTINUE →")}
+              </button>
+
+              <div className="token-note" style={{ marginTop: 14 }}>
+                This link works once.
+              </div>
+            </>
+          )}
+        </div>
+      </AsciiFrame>
     </div>
   );
 }

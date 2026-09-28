@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { challengeFileUrl, getChallengeSolves, submitFlag } from "../api/rctf";
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { formatTimestamp } from "../utils";
 import type { RctfChallengeFile } from "../types";
@@ -33,6 +35,7 @@ export function ChallengeModal({
   onClose: () => void;
 }) {
   const [view, setView] = useState<"details" | "solvers">("details");
+  const { isLoggedIn } = useAuth();
   useEscapeKey(onClose);
 
   const solvesQuery = useQuery({
@@ -151,29 +154,35 @@ export function ChallengeModal({
                   style={{ marginTop: 24, marginBottom: 0 }}
                 >
                   <div className="field-label">SUBMIT FLAG</div>
-                  <form
-                    style={{ display: "flex", gap: 8 }}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (flag && !solved && !flagMutation.isPending)
-                        flagMutation.mutate();
-                    }}
-                  >
-                    <input
-                      value={flag}
-                      onChange={(e) => setFlag(e.target.value)}
-                      placeholder="friday{}"
-                      disabled={solved}
-                      style={{ flex: 1, width: "auto", minWidth: 0 }}
-                    />
-                    <button
-                      className="btn btn-small btn-primary"
-                      type="submit"
-                      disabled={!flag || solved || flagMutation.isPending}
+                  {!isLoggedIn ? (
+                    <div className="mono-dim">
+                      <Link to="/login">log in</Link> to submit a flag.
+                    </div>
+                  ) : (
+                    <form
+                      style={{ display: "flex", gap: 8 }}
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (flag && !solved && !flagMutation.isPending)
+                          flagMutation.mutate();
+                      }}
                     >
-                      {flagMutation.isPending ? "..." : "SUBMIT"}
-                    </button>
-                  </form>
+                      <input
+                        value={flag}
+                        onChange={(e) => setFlag(e.target.value)}
+                        placeholder="friday{}"
+                        disabled={solved}
+                        style={{ flex: 1, width: "auto", minWidth: 0 }}
+                      />
+                      <button
+                        className="btn btn-small btn-primary"
+                        type="submit"
+                        disabled={!flag || solved || flagMutation.isPending}
+                      >
+                        {flagMutation.isPending ? "..." : "SUBMIT"}
+                      </button>
+                    </form>
+                  )}
                 </div>
 
                 {solved && (

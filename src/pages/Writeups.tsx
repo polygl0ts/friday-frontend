@@ -81,25 +81,25 @@ export function Writeups() {
         <div>
           <PageNote page="writeups" />
         </div>
-        {isLoggedIn && (
-          <div className="tab-bar">
-            {tier !== "mine" && (
-              <DropDownCategory value={category} onChange={setCategory} />
-            )}
-            <div className="tab-group">
-              {TIERS.map((t) => (
-                <button
-                  key={t}
-                  className={`pill${tier === t ? " active" : ""}`}
-                  onClick={() => setTier(t)}
-                >
-                  {t.toUpperCase()}
-                </button>
-              ))}
-            </div>
+        <div className="tab-bar">
+          {tier !== "mine" && (
+            <DropDownCategory value={category} onChange={setCategory} />
+          )}
+          <div className="tab-group">
+            {TIERS.map((t) => (
+              <button
+                key={t}
+                className={`pill${tier === t ? " active" : ""}`}
+                onClick={() => setTier(t)}
+              >
+                {t.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-            <span className="tab-divider" />
+          {isLoggedIn && <span className="tab-divider" />}
 
+          {isLoggedIn && (
             <button
               className={`pill pill-mine${tier === "mine" ? " active" : ""}`}
               onClick={() => setTier("mine")}
@@ -112,55 +112,47 @@ export function Writeups() {
                 <span className="pill-alert" title="A writeup was rejected" />
               )}
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-
-      {!isLoggedIn && (
-        <div className="empty-text">Log in to read the writeups.</div>
-      )}
 
       {isLoggedIn && tier === "mine" ? (
         <MyWriteups />
       ) : (
-        isLoggedIn && (
-          <>
-            {challengesQuery.isLoading && (
-              <div className="loading">Loading writeups...</div>
-            )}
-            {challengesQuery.error && (
-              <div className="error-text">
-                {(challengesQuery.error as Error).message}
-              </div>
-            )}
-            {challengesQuery.data && groups.length === 0 && (
-              <div className="empty-text">No challenges in this tier yet.</div>
-            )}
+        <>
+          {challengesQuery.isLoading && (
+            <div className="loading">Loading writeups...</div>
+          )}
+          {challengesQuery.error && (
+            <div className="error-text">
+              {(challengesQuery.error as Error).message}
+            </div>
+          )}
+          {challengesQuery.data && groups.length === 0 && (
+            <div className="empty-text">No challenges in this tier yet.</div>
+          )}
 
-            {groups.map((group, index) => (
-              <div
-                key={group.category}
-                className={`category-section${index > 0 ? " category-section-split" : ""}`}
-              >
-                <div className="category-heading">
-                  <span className="category-heading-name">
-                    {group.category}
-                  </span>
-                </div>
-                <div className="grid grid-3">
-                  {group.challenges.map((chall) => (
-                    <WriteupCard
-                      key={chall.id}
-                      chall={chall}
-                      cards={cardsFor(chall.id)}
-                      onOpen={() => setOpen(chall)}
-                    />
-                  ))}
-                </div>
+          {groups.map((group, index) => (
+            <div
+              key={group.category}
+              className={`category-section${index > 0 ? " category-section-split" : ""}`}
+            >
+              <div className="category-heading">
+                <span className="category-heading-name">{group.category}</span>
               </div>
-            ))}
-          </>
-        )
+              <div className="grid grid-3">
+                {group.challenges.map((chall) => (
+                  <WriteupCard
+                    key={chall.id}
+                    chall={chall}
+                    cards={cardsFor(chall.id)}
+                    onOpen={() => setOpen(chall)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
       )}
 
       {open && (

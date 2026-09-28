@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { unvoteWriteup, upvoteWriteup } from "../api/extras";
+import { useAuth } from "../auth/AuthContext";
 
 /**
  * StackOverflow-style upvote for writeup.
@@ -17,6 +18,7 @@ export function VoteButton({
   own?: boolean;
 }) {
   const queryClient = useQueryClient();
+  const { isLoggedIn } = useAuth();
 
   const mutation = useMutation({
     mutationFn: () => (voted ? unvoteWriteup(writeupId) : upvoteWriteup(writeupId)),
@@ -33,8 +35,16 @@ export function VoteButton({
   return (
     <button
       className={`vote${optimistic ? " voted" : ""}`}
-      disabled={own || mutation.isPending}
-      title={own ? "You can't upvote your own writeup" : optimistic ? "Remove upvote" : "Upvote"}
+      disabled={!isLoggedIn || own || mutation.isPending}
+      title={
+        !isLoggedIn
+          ? "Log in to upvote"
+          : own
+            ? "You can't upvote your own writeup"
+            : optimistic
+              ? "Remove upvote"
+              : "Upvote"
+      }
       aria-pressed={optimistic}
       onClick={(e) => {
         e.stopPropagation();

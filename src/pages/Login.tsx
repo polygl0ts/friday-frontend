@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { loginWithTeamToken, recoverAccount, register } from "../api/rctf";
 import { useAuth } from "../auth/AuthContext";
+import { AsciiFrame } from "../components/AsciiFrame";
 
 export function Login() {
   const [mode, setMode] = useState<"register" | "token" | "recover">(
@@ -40,234 +41,256 @@ export function Login() {
   });
 
   return (
-    <div
-      className="page"
-      style={{ display: "flex", justifyContent: "center", paddingTop: 90 }}
-    >
-      <div
-        style={{
-          width: 420,
-          maxWidth: "100%",
-          border: "1px solid var(--border)",
-          background: "var(--bg-card-alt)",
-          padding: 30,
-          outline: "1px solid var(--border-dim)",
-          outlineOffset: 4,
-        }}
+    <div className="page auth-page">
+      <AsciiFrame
+        rank="silver"
+        title={
+          mode === "register"
+            ? "register"
+            : mode === "token"
+              ? "login"
+              : "email link"
+        }
+        className="auth-frame"
       >
-        <div style={{ display: "flex", gap: 8, marginBottom: 30 }}>
-          <button
-            className={`pill${mode === "register" ? " active" : ""}`}
-            style={{ flex: 1, textAlign: "center" }}
-            onClick={() => setMode("register")}
-          >
-            REGISTER
-          </button>
-          <button
-            className={`pill${mode === "token" ? " active" : ""}`}
-            style={{ flex: 1, textAlign: "center" }}
-            onClick={() => setMode("token")}
-          >
-            PLAYER TOKEN
-          </button>
-          <button
-            className={`pill${mode === "recover" ? " active" : ""}`}
-            style={{ flex: 1, textAlign: "center" }}
-            onClick={() => setMode("recover")}
-          >
-            EMAIL LINK
-          </button>
-        </div>
-
-        {mode === "recover" ? (
-          <>
-            <div
-              className="heading"
-              style={{
-                fontSize: 24,
-                color: "var(--text-bright)",
-                fontWeight: 600,
-              }}
+        <div style={{ width: 380, maxWidth: "100%" }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 30 }}>
+            <button
+              className={`pill${mode === "register" ? " active" : ""}`}
+              style={{ flex: 1, textAlign: "center" }}
+              onClick={() => setMode("register")}
             >
-              Email me a login link
-            </div>
-            <div className="mono-dim" style={{ marginTop: 8, lineHeight: 1.6 }}>
-              For a player that already exists. The link logs you straight in -
-              no player token needed.
-            </div>
+              REGISTER
+            </button>
+            <button
+              className={`pill${mode === "token" ? " active" : ""}`}
+              style={{ flex: 1, textAlign: "center" }}
+              onClick={() => setMode("token")}
+            >
+              PLAYER TOKEN
+            </button>
+            <button
+              className={`pill${mode === "recover" ? " active" : ""}`}
+              style={{ flex: 1, textAlign: "center" }}
+              onClick={() => setMode("recover")}
+            >
+              EMAIL LINK
+            </button>
+          </div>
 
-            {recoverMutation.isSuccess ? (
-              <div className="chip" style={{ marginTop: 24 }}>
-                <span className="dot" style={{ background: "var(--green)" }} />
-                Check your email for a login link
-              </div>
-            ) : (
-              <form
-                style={{ marginTop: 24 }}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  recoverMutation.mutate();
+          {mode === "recover" ? (
+            <>
+              <div
+                className="heading"
+                style={{
+                  fontSize: 24,
+                  color: "var(--text-bright)",
+                  fontWeight: 600,
                 }}
               >
-                <div className="field">
-                  <div className="field-label">EMAIL</div>
-                  <input
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="player@epfl.ch"
-                  />
-                </div>
-                {recoverMutation.isError && (
-                  <div
-                    className="error-text"
-                    style={{ padding: 0, marginBottom: 12, textAlign: "left" }}
-                  >
-                    {(recoverMutation.error as Error).message}
-                  </div>
-                )}
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  style={{ width: "100%" }}
-                  disabled={!email || recoverMutation.isPending}
-                >
-                  {recoverMutation.isPending
-                    ? "SENDING..."
-                    : "SEND LOGIN LINK →"}
-                </button>
-              </form>
-            )}
-          </>
-        ) : mode === "register" ? (
-          <>
-            <div
-              className="heading"
-              style={{
-                fontSize: 24,
-                color: "var(--text-bright)",
-                fontWeight: 600,
-              }}
-            >
-              Join Polygl0ts CTF
-            </div>
-            <div className="mono-dim" style={{ marginTop: 8, lineHeight: 1.6 }}>
-              rCTF is passwordless: register with an email and we'll send you a
-              login link. Save the player token from your profile afterwards to
-              log back in on another device without re-verifying.
-            </div>
-
-            {registerMutation.data?.authToken === null ? (
-              <div className="chip" style={{ marginTop: 24 }}>
-                <span className="dot" style={{ background: "var(--green)" }} />
-                Check your email for a login link
+                Email me a login link
               </div>
-            ) : (
-              <form
-                style={{ marginTop: 24 }}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  registerMutation.mutate();
-                }}
+              <div
+                className="mono-dim"
+                style={{ marginTop: 8, lineHeight: 1.6 }}
               >
-                <div className="field">
-                  <div className="field-label">PLAYER NAME</div>
-                  <input
-                    name="team"
-                    autoComplete="organization"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="razm0"
-                  />
-                </div>
-                <div className="field">
-                  <div className="field-label">EMAIL</div>
-                  <input
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="player@epfl.ch"
-                  />
-                </div>
-                {registerMutation.isError && (
-                  <div
-                    className="error-text"
-                    style={{ padding: 0, marginBottom: 12, textAlign: "left" }}
-                  >
-                    {(registerMutation.error as Error).message}
-                  </div>
-                )}
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  style={{ width: "100%" }}
-                  disabled={!email || !name || registerMutation.isPending}
-                >
-                  {registerMutation.isPending
-                    ? "SENDING..."
-                    : "SEND LOGIN LINK →"}
-                </button>
-              </form>
-            )}
-          </>
-        ) : (
-          <>
-            <div
-              className="heading"
-              style={{
-                fontSize: 24,
-                color: "var(--text-bright)",
-                fontWeight: 600,
-              }}
-            >
-              Log back in
-            </div>
-            <div className="mono-dim" style={{ marginTop: 8, lineHeight: 1.6 }}>
-              Paste the player token from your profile page.
-            </div>
-
-            <form
-              style={{ marginTop: 24 }}
-              onSubmit={(e) => {
-                e.preventDefault();
-                tokenLoginMutation.mutate();
-              }}
-            >
-              <div className="field">
-                <div className="field-label">PLAYER TOKEN</div>
-                <input
-                  type="password"
-                  name="token"
-                  autoComplete="current-password"
-                  value={teamToken}
-                  onChange={(e) => setTeamToken(e.target.value)}
-                  placeholder="teamtok_..."
-                />
+                For a player that already exists. The link logs you straight in
+                - no player token needed.
               </div>
-              {tokenLoginMutation.isError && (
-                <div
-                  className="error-text"
-                  style={{ padding: 0, marginBottom: 12, textAlign: "left" }}
-                >
-                  {(tokenLoginMutation.error as Error).message}
+
+              {recoverMutation.isSuccess ? (
+                <div className="chip" style={{ marginTop: 24 }}>
+                  <span
+                    className="dot"
+                    style={{ background: "var(--green)" }}
+                  />
+                  Check your email for a login link
                 </div>
+              ) : (
+                <form
+                  style={{ marginTop: 24 }}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    recoverMutation.mutate();
+                  }}
+                >
+                  <div className="field">
+                    <div className="field-label">EMAIL</div>
+                    <input
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="player@epfl.ch"
+                    />
+                  </div>
+                  {recoverMutation.isError && (
+                    <div
+                      className="error-text"
+                      style={{
+                        padding: 0,
+                        marginBottom: 12,
+                        textAlign: "left",
+                      }}
+                    >
+                      {(recoverMutation.error as Error).message}
+                    </div>
+                  )}
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    style={{ width: "100%" }}
+                    disabled={!email || recoverMutation.isPending}
+                  >
+                    {recoverMutation.isPending
+                      ? "SENDING..."
+                      : "SEND LOGIN LINK →"}
+                  </button>
+                </form>
               )}
-              <button
-                className="btn btn-primary"
-                type="submit"
-                style={{ width: "100%" }}
-                disabled={!teamToken || tokenLoginMutation.isPending}
+            </>
+          ) : mode === "register" ? (
+            <>
+              <div
+                className="heading"
+                style={{
+                  fontSize: 24,
+                  color: "var(--text-bright)",
+                  fontWeight: 600,
+                }}
               >
-                {tokenLoginMutation.isPending ? "LOGGING IN..." : "LOG IN →"}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
+                Join Polygl0ts CTF
+              </div>
+              <div
+                className="mono-dim"
+                style={{ marginTop: 8, lineHeight: 1.6 }}
+              >
+                rCTF is passwordless: register with an email and we'll send you
+                a login link. Save the player token from your profile afterwards
+                to log back in on another device without re-verifying.
+              </div>
+
+              {registerMutation.data?.authToken === null ? (
+                <div className="chip" style={{ marginTop: 24 }}>
+                  <span
+                    className="dot"
+                    style={{ background: "var(--green)" }}
+                  />
+                  Check your email for a login link
+                </div>
+              ) : (
+                <form
+                  style={{ marginTop: 24 }}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    registerMutation.mutate();
+                  }}
+                >
+                  <div className="field">
+                    <div className="field-label">PLAYER NAME</div>
+                    <input
+                      name="team"
+                      autoComplete="organization"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="razm0"
+                    />
+                  </div>
+                  <div className="field">
+                    <div className="field-label">EMAIL</div>
+                    <input
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="player@epfl.ch"
+                    />
+                  </div>
+                  {registerMutation.isError && (
+                    <div
+                      className="error-text"
+                      style={{
+                        padding: 0,
+                        marginBottom: 12,
+                        textAlign: "left",
+                      }}
+                    >
+                      {(registerMutation.error as Error).message}
+                    </div>
+                  )}
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    style={{ width: "100%" }}
+                    disabled={!email || !name || registerMutation.isPending}
+                  >
+                    {registerMutation.isPending
+                      ? "SENDING..."
+                      : "SEND LOGIN LINK →"}
+                  </button>
+                </form>
+              )}
+            </>
+          ) : (
+            <>
+              <div
+                className="heading"
+                style={{
+                  fontSize: 24,
+                  color: "var(--text-bright)",
+                  fontWeight: 600,
+                }}
+              >
+                Log back in
+              </div>
+              <div
+                className="mono-dim"
+                style={{ marginTop: 8, lineHeight: 1.6 }}
+              >
+                Paste the player token from your profile page.
+              </div>
+
+              <form
+                style={{ marginTop: 24 }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  tokenLoginMutation.mutate();
+                }}
+              >
+                <div className="field">
+                  <div className="field-label">PLAYER TOKEN</div>
+                  <input
+                    type="password"
+                    name="token"
+                    autoComplete="current-password"
+                    value={teamToken}
+                    onChange={(e) => setTeamToken(e.target.value)}
+                    placeholder="teamtok_..."
+                  />
+                </div>
+                {tokenLoginMutation.isError && (
+                  <div
+                    className="error-text"
+                    style={{ padding: 0, marginBottom: 12, textAlign: "left" }}
+                  >
+                    {(tokenLoginMutation.error as Error).message}
+                  </div>
+                )}
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  style={{ width: "100%" }}
+                  disabled={!teamToken || tokenLoginMutation.isPending}
+                >
+                  {tokenLoginMutation.isPending ? "LOGGING IN..." : "LOG IN →"}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </AsciiFrame>
     </div>
   );
 }

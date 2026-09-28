@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { getChallengeSolves } from "../api/rctf";
 import { ChallengeModal } from "./ChallengeModal";
 
+vi.mock("../auth/AuthContext", () => ({ useAuth: () => ({ isLoggedIn: true }) }));
+
 vi.mock("../api/rctf", () => ({
   challengeFileUrl: (url: string) => `https://rctf.example${url}`,
   getChallengeSolves: vi.fn(async () => []),

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
 import { frameRank } from "../components/AsciiFrame";
-import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta } from "../types";
 import { groupByCategory } from "../utils";
@@ -10,7 +9,6 @@ import { PageNote } from "../components/PageNote";
 
 /** Juicer tab, no sub category, only the regular */
 export function Juicers() {
-  const { isLoggedIn } = useAuth();
   const [detailsChallenge, setDetailsChallenge] =
     useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();
@@ -36,11 +34,7 @@ export function Juicers() {
         </div>
       </div>
 
-      {!isLoggedIn && (
-        <div className="empty-text">Log in to view the challenges.</div>
-      )}
-
-      {isLoggedIn && challengesQuery.isLoading && (
+      {challengesQuery.isLoading && (
         <div className="loading">Loading challenges...</div>
       )}
       {challengesQuery.error && (
@@ -58,9 +52,7 @@ export function Juicers() {
           className={`category-section${index > 0 ? " category-section-split" : ""}`}
         >
           <div className="category-heading">
-            <span className="category-heading-name">
-              {group.category}
-            </span>
+            <span className="category-heading-name">{group.category}</span>
           </div>
           <div className="grid grid-3">
             {group.challenges.map((chall) => (
