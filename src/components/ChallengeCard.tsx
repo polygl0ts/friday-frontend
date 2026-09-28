@@ -27,7 +27,7 @@ export function ChallengeCard({
           </span>
         ))}
         <span className="card-stats-end">
-          <span className="card-meta" title="solves">
+          <span className="card-meta card-hover-meta" title="solves">
             &#9670;{chall.solveCount}
           </span>
           {chall.firstBlood && (
@@ -35,7 +35,9 @@ export function ChallengeCard({
               &#129656; {chall.firstBlood}
             </span>
           )}
-          {chall.solved && <span className="card-solved">[&#10003; SOLVED]</span>}
+          {chall.solved && (
+            <span className="card-solved">[&#10003; SOLVED]</span>
+          )}
         </span>
       </div>
       <div className="card-desc compact">

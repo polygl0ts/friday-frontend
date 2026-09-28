@@ -1210,7 +1210,10 @@ a.b88-img:hover {
   left: 50%;
   z-index: 1;
   transform: translateX(-50%);
-  background: var(--bg-frame);
+  background: linear-gradient(
+    var(--frame-fill, var(--bg-frame)) 50%,
+    var(--bg-frame) 50%
+  );
 }
 .ascii-frame.rank-juicer.interactive:hover .rule-top .rule-fill::after {
   animation: rule-spark 1.2s steps(16) infinite;
@@ -1281,6 +1284,14 @@ a.b88-img:hover {
 .chall-card .card-meta,
 .chall-card .card-meta.blood {
   color: var(--text-dim);
+}
+.chall-card .card-hover-meta,
+.chall-card .card-meta.blood {
+  visibility: hidden;
+}
+.chall-card:hover .card-hover-meta,
+.chall-card:hover .card-meta.blood {
+  visibility: visible;
 }
 .chall-card .tag-box:not(.accent) {
   color: #cbc1c2;
