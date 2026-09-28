@@ -1,7 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import logoUrl from "../assets/logo.svg";
-import { ThemeToggle } from "./ThemeButton";
 
 const NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/", label: "home" },
@@ -73,7 +72,6 @@ export function Header() {
                 login
               </NavLink>
             )}
-            <ThemeToggle />
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { useAuth } from "../auth/AuthContext";
 import { formatTimestamp } from "../utils";
@@ -39,36 +39,20 @@ function dayTicks(minTime: number, maxTime: number): Date[] {
 /**
  * The card colours, read from the stylesheet rather than written twice.
  */
-function useChartColors() {
-  const read = () => {
-    const style = getComputedStyle(document.documentElement);
-    const value = (name: string, fallback: string) =>
-      style.getPropertyValue(name).trim() || fallback;
-    return {
-      background: value("--bg-card", "#141011"),
-      grid: value("--border-dim", "#2f2729"),
-      text: value("--text-dim", "#9a8f90"),
-      light: document.documentElement.dataset.theme === "light",
-    };
+function chartColors() {
+  const style = getComputedStyle(document.documentElement);
+  const value = (name: string, fallback: string) =>
+    style.getPropertyValue(name).trim() || fallback;
+  return {
+    background: value("--bg-card", "#141011"),
+    grid: value("--border-dim", "#2f2729"),
+    text: value("--text-dim", "#9a8f90"),
   };
-
-  const [colors, setColors] = useState(read);
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => setColors(read()));
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  return colors;
 }
 
 export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
   const { profile } = useAuth();
-  const colors = useChartColors();
+  const [colors] = useState(chartColors);
 
   if (series.length === 0) {
     return <div className="empty-text">No score history yet.</div>;
@@ -150,7 +134,7 @@ export function ScoreGraph({ series }: { series: RctfLeaderboardPoint[] }) {
               line: {
                 stroke: colors.grid,
                 strokeWidth: 1,
-                strokeOpacity: colors.light ? 0.18 : 0.8,
+                strokeOpacity: 0.8,
               },
             },
           }}
