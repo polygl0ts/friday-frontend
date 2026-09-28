@@ -31,7 +31,9 @@ uv venv --quiet --allow-existing "$API_DIR/.venv" \
 VIRTUAL_ENV="$API_DIR/.venv" uv pip install --quiet -r "$API_DIR/requirements.txt"
 
 # install deps for frontend
-[ -d "$WEB_DIR/node_modules" ] || (cd "$WEB_DIR" && npm install)
+if [ "$WEB_DIR/package-lock.json" -nt "$WEB_DIR/node_modules/.package-lock.json" ]; then
+  (cd "$WEB_DIR" && npm ci)
+fi
 
 mkdir -p "$API_DIR/data"
 
