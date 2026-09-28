@@ -9,8 +9,8 @@ import { listChallenges } from "../api/rctf";
  * name for its Discord messages but never serves it, since rCTF owns the
  * current one and a rename would leave the stored copy wrong.
  *
- * Not `useChallenges`: that list is filtered down to the tiered grid, and
- * writeups exist for INTRO2 challenges too. Shares the `challengeList` query
+ * Not `useChallenges`: that list drops any challenge the grids cannot show,
+ * and a writeup may still point at one. Shares the `challengeList` query
  * key with the home page, so this is usually served from cache.
  *
  * Falls back to the id, which is all anyone could show for a challenge rCTF

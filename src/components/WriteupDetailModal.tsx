@@ -16,6 +16,7 @@ import { formatTimestamp, isSafeUrl, joinWriteup } from "../utils";
 import type { Writeup, WriteupCard, WriteupSort } from "../types";
 import { GradeWriteup } from "./GradeWriteup";
 import { WriteupScore } from "./WriteupScore";
+import { AsciiFrame, type FrameRank } from "./AsciiFrame";
 
 /**
  * All the writeups for one challenge: read them, and post your own.
@@ -25,6 +26,7 @@ export function WriteupDetailModal({
   challengeName,
   category,
   canSubmit,
+  rank = "silver",
   onClose,
 }: {
   challengeId: string;
@@ -32,6 +34,7 @@ export function WriteupDetailModal({
   category: string;
   /** Whether this team solved the challenge.*/
   canSubmit: boolean;
+  rank?: FrameRank;
   onClose: () => void;
 }) {
   const [openId, setOpenId] = useState<number | null>(null);
@@ -47,138 +50,136 @@ export function WriteupDetailModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div>
-            <span
-              className="heading"
-              style={{
-                fontSize: 17,
-                color: "var(--text-bright)",
-                fontWeight: 600,
-              }}
+      <div
+        className="modal-frame writeup-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <AsciiFrame
+          rank={rank}
+          variant="writeup"
+          title={challengeName}
+          figure="WRITEUPS"
+          topRight={
+            <button
+              className="frame-close"
+              onClick={onClose}
+              aria-label="Close"
             >
-              {challengeName}
-            </span>
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: "0.18em",
-                color: "var(--red)",
-                marginTop: 6,
-              }}
-            >
-              {category.toUpperCase()} &middot; WRITEUPS
-            </div>
-          </div>
-          <button className="modal-close" onClick={onClose}>
-            &#10005;
-          </button>
-        </div>
+              x
+            </button>
+          }
+        >
+          <div className="modal-meta">{category}</div>
 
-        <div className="modal-body">
-          {composing ? (
-            <WriteupComposer
-              challengeId={challengeId}
-              onDone={() => setComposing(false)}
-            />
-          ) : openId !== null ? (
-            <WriteupReader id={openId} onBack={() => setOpenId(null)} />
-          ) : (
-            <>
-              {cardsQuery.isLoading && (
-                <div className="loading">Loading...</div>
-              )}
-              {cardsQuery.error && (
-                <div className="error-text">
-                  {(cardsQuery.error as Error).message}
-                </div>
-              )}
-              {cardsQuery.data?.length === 0 && (
-                <div className="empty-text" style={{ padding: "16px 0" }}>
-                  No writeups published yet. Be the first.
-                </div>
-              )}
+          <div className="modal-body">
+            {composing ? (
+              <WriteupComposer
+                challengeId={challengeId}
+                onDone={() => setComposing(false)}
+              />
+            ) : openId !== null ? (
+              <WriteupReader id={openId} onBack={() => setOpenId(null)} />
+            ) : (
+              <>
+                {cardsQuery.isLoading && (
+                  <div className="loading">Loading...</div>
+                )}
+                {cardsQuery.error && (
+                  <div className="error-text">
+                    {(cardsQuery.error as Error).message}
+                  </div>
+                )}
+                {cardsQuery.data?.length === 0 && (
+                  <div className="empty-text" style={{ padding: "16px 0" }}>
+                    No writeups published yet. Be the first.
+                  </div>
+                )}
 
-              {(cardsQuery.data?.length ?? 0) > 1 && (
-                <div className="sort-bar">
-                  {(["new", "top"] as const).map((s) => (
-                    <button
-                      key={s}
-                      className={`sort-tab${sort === s ? " active" : ""}`}
-                      onClick={() => setSort(s)}
-                    >
-                      {s === "new" ? "NEWEST" : "TOP"}
-                    </button>
+                {(cardsQuery.data?.length ?? 0) > 1 && (
+                  <div className="sort-bar">
+                    {(["new", "top"] as const).map((s) => (
+                      <button
+                        key={s}
+                        className={`sort-tab${sort === s ? " active" : ""}`}
+                        onClick={() => setSort(s)}
+                      >
+                        {s === "new" ? "NEWEST" : "TOP"}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 2 }}
+                >
+                  {cardsQuery.data?.map((w: WriteupCard) => (
+                    <div key={w.id} className="writeup-row-wrap">
+                      <VoteButton
+                        writeupId={w.id}
+                        votes={w.votes}
+                        voted={w.voted}
+                        own={w.team_name === profile?.name}
+                      />
+                      <button
+                        className="writeup-row"
+                        onClick={() => setOpenId(w.id)}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 12,
+                          }}
+                        >
+                          <span style={{ fontSize: 14, color: "var(--text)" }}>
+                            {w.team_name}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              color: "var(--text-dimmer)",
+                            }}
+                          >
+                            {formatTimestamp(Date.parse(w.created_at)) ?? "-"}
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 12,
+                            fontSize: 12,
+                            color: "var(--text-dim)",
+                            lineHeight: 1.65,
+                            marginTop: 8,
+                          }}
+                        >
+                          {w.summary}
+                          <WriteupScore score={w.score} graders={w.graders} />
+                        </div>
+                      </button>
+                      <DeleteButton writeupId={w.id} />
+                    </div>
                   ))}
                 </div>
-              )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {cardsQuery.data?.map((w: WriteupCard) => (
-                  <div key={w.id} className="writeup-row-wrap">
-                    <VoteButton
-                      writeupId={w.id}
-                      votes={w.votes}
-                      voted={w.voted}
-                      own={w.team_name === profile?.name}
-                    />
-                    <button
-                      className="writeup-row"
-                      onClick={() => setOpenId(w.id)}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 12,
-                        }}
-                      >
-                        <span style={{ fontSize: 14, color: "var(--text)" }}>
-                          {w.team_name}
-                        </span>
-                        <span
-                          style={{ fontSize: 11, color: "var(--text-dimmer)" }}
-                        >
-                          {formatTimestamp(Date.parse(w.created_at)) ?? "-"}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 12,
-                          fontSize: 12,
-                          color: "var(--text-dim)",
-                          lineHeight: 1.65,
-                          marginTop: 8,
-                        }}
-                      >
-                        {w.summary}
-                        <WriteupScore score={w.score} graders={w.graders} />
-                      </div>
-                    </button>
-                    <DeleteButton writeupId={w.id} />
+                {canSubmit ? (
+                  <button
+                    className="btn btn-outline"
+                    style={{ width: "100%", marginTop: 20 }}
+                    onClick={() => setComposing(true)}
+                  >
+                    POST A WRITEUP
+                  </button>
+                ) : (
+                  <div className="mono-dim center" style={{ marginTop: 20 }}>
+                    Solve this challenge to post your own writeup.
                   </div>
-                ))}
-              </div>
-
-              {canSubmit ? (
-                <button
-                  className="btn btn-outline"
-                  style={{ width: "100%", marginTop: 20 }}
-                  onClick={() => setComposing(true)}
-                >
-                  POST A WRITEUP
-                </button>
-              ) : (
-                <div className="mono-dim center" style={{ marginTop: 20 }}>
-                  Solve this challenge to post your own writeup.
-                </div>
-              )}
-            </>
-          )}
-        </div>
+                )}
+              </>
+            )}
+          </div>
+        </AsciiFrame>
       </div>
     </div>
   );

@@ -192,7 +192,7 @@ export function AdminChallenges() {
             color: "var(--text-dimmer)",
           }}
         >
-          {challenges.length} TOTAL &middot; {hiddenCount} HIDDEN
+          {challenges.length} total &middot; {hiddenCount} hidden
         </span>
       </div>
 

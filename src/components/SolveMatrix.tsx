@@ -21,8 +21,8 @@ import type { RctfLeaderboardEntry } from "../types";
  *
  * Bloods deliberately come from that route's `firstSolvers` rather than from
  * the standings: the first team to solve something may sit below the page
- * being displayed, or not rank at all (a team whose only solves are the
- * zero-point INTRO2 track). Ordering the visible teams by solve time would
+ * being displayed, or not rank at all (a team whose only solves are worth
+ * zero points). Ordering the visible teams by solve time would
  * then hand the red flag to whoever is merely earliest *on screen*.
  */
 
@@ -195,7 +195,7 @@ export function SolveMatrix({ teams }: { teams: RctfLeaderboardEntry[] }) {
                 }}
                 title={group.category}
               >
-                <span className="matrix-cat-label">{group.category.toUpperCase()}</span>
+                <span className="matrix-cat-label">{group.category}</span>
               </th>
             ))}
             <th className="matrix-tail" />

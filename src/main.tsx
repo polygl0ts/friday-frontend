@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import { AuthProvider } from "./auth/AuthContext.tsx";
 import { loadRuntimeConfig } from "./config.ts";
 import "./index.css";
+import { installAsciiPatterns } from "./asciiPatterns.ts";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -19,6 +20,7 @@ function showStartupError(error: unknown): void {
 }
 
 async function bootstrap(): Promise<void> {
+  installAsciiPatterns();
   try {
     await loadRuntimeConfig();
   } catch (error) {

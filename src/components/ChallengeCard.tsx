@@ -1,5 +1,6 @@
 import type { ChallengeWithMeta } from "../types";
 import { topicTags, withoutConnectionInfo } from "../utils";
+import { AsciiFrame, frameRank } from "./AsciiFrame";
 import { Markdown } from "./Markdown";
 
 export function ChallengeCard({
@@ -10,18 +11,15 @@ export function ChallengeCard({
   onOpenDetails: () => void;
 }) {
   return (
-    <div
-      className={`card chall-card rank-${chall.juicer ? "juicer" : (chall.tier ?? "silver")}${chall.solved ? " solved" : ""}`}
+    <AsciiFrame
+      rank={frameRank(chall)}
+      title={chall.name}
+      figure={chall.points_current}
+      solved={chall.solved}
+      interactive
+      className="card chall-card"
       onClick={onOpenDetails}
-      style={{ cursor: "pointer" }}
     >
-      <div className="rule rule-top">
-        <span className="card-name">{chall.name}</span>
-        <span className="rule-fill" aria-hidden="true" />
-        <span className={`card-points${chall.solved ? " solved" : ""}`}>
-          {chall.points_current}
-        </span>
-      </div>
       <div className="card-stats">
         {topicTags(chall.tags, chall.category).map((tag) => (
           <span key={tag} className={`tag-box${chall.solved ? " accent" : ""}`}>
@@ -40,15 +38,11 @@ export function ChallengeCard({
           {chall.solved && <span className="card-solved">[&#10003; SOLVED]</span>}
         </span>
       </div>
-
       <div className="card-desc compact">
         <Markdown className="card-desc-markdown">
           {withoutConnectionInfo(chall.description)}
         </Markdown>
       </div>
-      <div className="rule rule-bottom" aria-hidden="true">
-        <span className="rule-fill" />
-      </div>
-    </div>
+    </AsciiFrame>
   );
 }

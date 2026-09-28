@@ -4,6 +4,7 @@ import { getLeaderboardWithGraph, listDivisions } from "../api/rctf";
 import { useAuth } from "../auth/AuthContext";
 import { ScoreGraph } from "../components/ScoreGraph";
 import { SolveMatrix } from "../components/SolveMatrix";
+import { AsciiFrame } from "../components/AsciiFrame";
 
 /** The tab that asks for no division at all, rather than for one named "". */
 const ALL = "";
@@ -71,28 +72,25 @@ export function Scoreboard() {
                 {divisions.map((d) => (
                   <button
                     key={d.id}
-                    className={`pill${division === d.id ? " active" : ""}`}
+                    className={`pill pill-data${division === d.id ? " active" : ""}`}
                     onClick={() => setDivision(d.id)}
                     title={d.id}
                   >
-                    {d.name.toUpperCase()}
+                    {d.name}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          <div
-            style={{
-              border: "1px solid var(--border)",
-              margin: "30px 0",
-              padding: 20,
-              background: "var(--bg-card)",
-            }}
+          <AsciiFrame
+            rank="silver"
+            title="score graph"
+            className="scoreboard-frame"
           >
             {boardQuery.isLoading && <div className="loading">Loading...</div>}
             {boardQuery.data && <ScoreGraph series={series} />}
-          </div>
+          </AsciiFrame>
 
           {boardQuery.isLoading && <div className="loading">Loading...</div>}
           {boardQuery.error && (
@@ -110,61 +108,65 @@ export function Scoreboard() {
           )}
 
           {boardQuery.data && entries.length > 0 && (
-            <div className="table">
-              <div className="table-row table-head">
-                <span>RANK</span>
-                <span>NAME</span>
-                <span>SOLVES</span>
-                <span style={{ textAlign: "right" }}>POINTS</span>
-              </div>
-              {entries.map((row, i) => (
-                <div
-                  className={`table-row${row.id === profile?.id ? " me" : ""}`}
-                  key={row.id}
-                >
-                  <span className={`rank${i === 0 ? " lead" : ""}`}>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      color: "var(--text)",
-                    }}
-                  >
-                    <span className="row-avatar">
-                      {row.avatarUrl && (
-                        <img
-                          className="avatar-img"
-                          src={row.avatarUrl}
-                          alt=""
-                        />
-                      )}
-                    </span>
-                    {row.name}
-                  </span>
-                  <span style={{ color: "var(--text-dim)" }}>
-                    {row.solves?.length ?? "-"}
-                  </span>
-                  <span style={{ textAlign: "right", fontWeight: 700 }}>
-                    {row.score}
-                  </span>
+            <AsciiFrame
+              rank="silver"
+              title="standings"
+              className="scoreboard-frame"
+            >
+              <div className="table">
+                <div className="table-row table-head">
+                  <span>RANK</span>
+                  <span>NAME</span>
+                  <span>SOLVES</span>
+                  <span style={{ textAlign: "right" }}>POINTS</span>
                 </div>
-              ))}
-            </div>
+                {entries.map((row, i) => (
+                  <div
+                    className={`table-row${row.id === profile?.id ? " me" : ""}`}
+                    key={row.id}
+                  >
+                    <span className={`rank${i === 0 ? " lead" : ""}`}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        color: "var(--text)",
+                      }}
+                    >
+                      <span className="row-avatar">
+                        {row.avatarUrl && (
+                          <img
+                            className="avatar-img"
+                            src={row.avatarUrl}
+                            alt=""
+                          />
+                        )}
+                      </span>
+                      {row.name}
+                    </span>
+                    <span style={{ color: "var(--text-dim)" }}>
+                      {row.solves?.length ?? "-"}
+                    </span>
+                    <span style={{ textAlign: "right", fontWeight: 700 }}>
+                      {row.score}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </AsciiFrame>
           )}
 
           {boardQuery.data && (
-            <>
-              <div
-                className="page-subtitle"
-                style={{ marginTop: 44, marginBottom: 16 }}
-              >
-                SOLVES BY TEAM
-              </div>
+            <AsciiFrame
+              rank="silver"
+              title="solves by team"
+              className="scoreboard-frame"
+            >
               <SolveMatrix teams={entries} />
-            </>
+            </AsciiFrame>
           )}
         </>
       )}

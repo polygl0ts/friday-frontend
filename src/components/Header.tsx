@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import logoUrl from "../assets/logo.svg";
 
@@ -35,45 +35,31 @@ export function Header() {
           </div>
         </NavLink>
 
-        <div className="status-box">
-          <div className="status-prompt">
+        <NavLink
+          to={isLoggedIn ? "/profile" : "/login"}
+          className={({ isActive }) => `status-box${isActive ? " active" : ""}`}
+        >
+          <span className="status-prompt">
             [<b>{isLoggedIn ? (profile?.name ?? "...") : "guest"}</b>
-            @polygl0ts ~]$ whoami
-          </div>
-          <div className="status-line">
-            {isLoggedIn ? (
-              <>
-                <Link
-                  className="avatar"
-                  to="/profile"
-                  title={profile?.name ?? "profile"}
-                >
-                  {profile?.avatarUrl && (
-                    <img className="avatar-img" src={profile.avatarUrl} alt="" />
-                  )}
-                </Link>
-                <span className="points-pill">{profile?.score ?? 0} pts</span>
-                <NavLink
-                  to="/profile"
-                  className={({ isActive }) =>
-                    `navlink${isActive ? " active" : ""}`
-                  }
-                >
-                  profile
-                </NavLink>
-              </>
-            ) : (
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  `navlink login-link${isActive ? " active" : ""}`
-                }
-              >
-                login
-              </NavLink>
-            )}
-          </div>
-        </div>
+            <span className="status-host">@polygl0ts ~</span>]
+            <span className="status-dollar">$</span>{" "}
+            <span className="status-cmd">
+              {isLoggedIn ? "vi ~/.profile" : "./login"}
+            </span>
+          </span>
+          {isLoggedIn && (
+            <span className="status-line">
+              <span className="points-pill">
+                {profile?.score ?? 0} <span className="points-unit">pts</span>
+              </span>
+              <span className="avatar">
+                {profile?.avatarUrl && (
+                  <img className="avatar-img" src={profile.avatarUrl} alt="" />
+                )}
+              </span>
+            </span>
+          )}
+        </NavLink>
       </div>
 
       <nav className="nav">

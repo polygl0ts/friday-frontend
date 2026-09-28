@@ -373,25 +373,6 @@ export interface DiscordTestResult {
   detail: string;
 }
 
-export interface Intro2Step {
-  challenge_id: string;
-  step: number;
-  title: string;
-  author: string; // "" when rCTF has no author on the challenge
-  description: string;
-  status: "done" | "in_progress" | "locked";
-  category: string;
-  files: RctfChallengeFile[];
-}
-
-/**
- * One category's INTRO2 track, as `/api/intro2/tracks` returns it.
- */
-export interface Intro2Track {
-  category: string;
-  steps: Intro2Step[];
-}
-
 /** Only what polygl0ts-extras owns. Player and challenge counts come from
  *  rCTF directly - see `pages/Admin.tsx`. */
 export interface AdminStats {

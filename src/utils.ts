@@ -9,9 +9,6 @@ import {
   type Tier,
 } from "./types";
 
-// Matches INTRO2_TAG in the backend's app/routers/intro2.py - challenges
-// tagged this way live on the dedicated INTRO2 page
-export const INTRO2_TAG = "intro2";
 export const JUICER_TAG = "juicer";
 
 /**
@@ -84,22 +81,6 @@ const ORDERED_CATEGORIES: readonly Category[] = CATEGORIES.filter(
  */
 const KNOWN_CATEGORIES: ReadonlySet<string> = new Set(ORDERED_CATEGORIES);
 
-/**
- * INTRO2 tracks in the site's own category order.
- */
-export function orderIntro2Tracks<T extends { category: string }>(
-  tracks: readonly T[],
-): T[] {
-  const rank = (category: string) => {
-    const index = ORDERED_CATEGORIES.indexOf(category as Category);
-    return index === -1 ? ORDERED_CATEGORIES.length : index;
-  };
-  return [...tracks].sort(
-    (a, b) =>
-      rank(a.category) - rank(b.category) ||
-      a.category.localeCompare(b.category),
-  );
-}
 
 /**
  * Group the given challenges by categories. Categories are the one
@@ -179,7 +160,6 @@ export function topicTags(
       !tag.startsWith(TIER_TAG_PREFIX) &&
       !tag.startsWith(ARCHIVE_TAG_PREFIX) &&
       tag !== JUICER_TAG &&
-      tag !== INTRO2_TAG &&
       tag.toLowerCase() !== category.toLowerCase(),
   );
 }

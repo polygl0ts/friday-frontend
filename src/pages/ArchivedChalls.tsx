@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChallengeCard } from "../components/ChallengeCard";
 import { ChallengeModal } from "../components/ChallengeModal";
+import { frameRank } from "../components/AsciiFrame";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
@@ -93,7 +94,7 @@ export function ArchivedChalls() {
         >
           <div className="category-heading">
             <span className="category-heading-name">
-              {group.category.toUpperCase()}
+              {group.category}
             </span>
           </div>
           <div className="grid grid-3">
@@ -116,6 +117,9 @@ export function ArchivedChalls() {
           category={detailsChallenge.category}
           description={detailsChallenge.description}
           files={detailsChallenge.files}
+          rank={frameRank(detailsChallenge)}
+          points={detailsChallenge.points_current}
+          solved={detailsChallenge.solved}
           onClose={() => setDetailsChallenge(null)}
         />
       )}

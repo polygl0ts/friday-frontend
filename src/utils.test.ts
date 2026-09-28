@@ -9,7 +9,6 @@ import {
   isJuicerFromTag,
   formatTimestamp,
   isSafeUrl,
-  orderIntro2Tracks,
   parseRctfTimestamp,
   resolveFileUrl,
   sheetScore,
@@ -25,7 +24,7 @@ describe("tierFromTags", () => {
   });
 
   it("ignores unrelated tags around it", () => {
-    expect(tierFromTags(["intro2", "beginner", "tier/gold", "web"])).toBe("gold");
+    expect(tierFromTags(["rsa", "beginner", "tier/gold", "web"])).toBe("gold");
   });
 
   it("ignores points entirely", () => {
@@ -36,7 +35,7 @@ describe("tierFromTags", () => {
   });
 
   it("returns null with no tier tag", () => {
-    expect(tierFromTags(["intro2"])).toBeNull();
+    expect(tierFromTags(["rsa"])).toBeNull();
     expect(tierFromTags([])).toBeNull();
   });
 
@@ -86,7 +85,7 @@ describe("isJuicerFromTag", () => {
     expect(isJuicerFromTag(undefined)).toBe(false);
   });
 
-  it("is an exact match, like INTRO2 and unlike the prefixed tags", () => {
+  it("is an exact match, unlike the prefixed tags", () => {
     // `juicer` carries no subcategory, so there is nothing after it to parse -
     // anything longer is a different tag.
     expect(isJuicerFromTag(["Juicer"])).toBe(false);
@@ -143,7 +142,7 @@ describe("formatFileSize", () => {
 
 describe("topicTags", () => {
   it("keeps topic tags and drops the site's filing tags", () => {
-    expect(topicTags(["tier/bronze", "rsa", "juicer", "archived/lake25", "intro2", "ecc"], "crypto")).toEqual([
+    expect(topicTags(["tier/bronze", "rsa", "juicer", "archived/lake25", "ecc"], "crypto")).toEqual([
       "rsa",
       "ecc",
     ]);
@@ -359,27 +358,6 @@ describe("canWriteChalls", () => {
     // full admin included, read as not-an-admin and the panel became
     // unreachable. Any implementation that ANDs the two masks fails here.
     expect(isAdminPerms(FULL_ADMIN) && canWriteChalls(FULL_ADMIN)).toBe(true);
-  });
-});
-
-describe("orderIntro2Tracks", () => {
-  const t = (category: string) => ({ category, steps: [] });
-
-  it("puts the tracks in the site's category order, not the API's", () => {
-    // What the backend sends: grouped by category, sorted alphabetically.
-    const ordered = orderIntro2Tracks([t("web"), t("crypto"), t("misc"), t("pwn"), t("rev")]);
-    expect(ordered.map((x) => x.category)).toEqual(["rev", "pwn", "web", "crypto", "misc"]);
-  });
-
-  it("keeps a category this build doesn't know, sorted after the known ones", () => {
-    const ordered = orderIntro2Tracks([t("forensics"), t("web"), t("blockchain")]);
-    expect(ordered.map((x) => x.category)).toEqual(["web", "blockchain", "forensics"]);
-  });
-
-  it("does not mutate the array it is given", () => {
-    const tracks = [t("web"), t("rev")];
-    orderIntro2Tracks(tracks);
-    expect(tracks.map((x) => x.category)).toEqual(["web", "rev"]);
   });
 });
 

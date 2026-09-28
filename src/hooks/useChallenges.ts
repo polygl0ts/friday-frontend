@@ -9,7 +9,6 @@ import {
 import { useAuth } from "../auth/AuthContext";
 import type { ChallengeWithMeta } from "../types";
 import {
-  INTRO2_TAG,
   archiveFromTags,
   isJuicerFromTag,
   tierFromTags,
@@ -74,16 +73,13 @@ export function useChallenges() {
       ]);
 
       const withMeta = challenges.flatMap((chall): ChallengeWithMeta[] => {
-        if ((chall.tags ?? []).includes(INTRO2_TAG)) return [];
-
         const tier = tierFromTags(chall.tags);
         const archived = archiveFromTags(chall.tags);
         const juicer = isJuicerFromTag(chall.tags);
         if (tier === null && archived === null && !juicer) {
           console.warn(
             `challenge "${chall.id}" has no tier/*, archive/* or juicer tag ` +
-              `and is not on the INTRO2 track, so it cannot be shown in any ` +
-              `grid. Add tier/bronze, tier/silver, tier/gold, an archive/* tag ` +
+              `so it cannot be shown in any grid. Add tier/bronze, tier/silver, tier/gold, an archive/* tag ` +
               `or juicer to it in rCTF.`,
           );
           return [];

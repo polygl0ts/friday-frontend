@@ -19,7 +19,7 @@ export function DropDownCategory({
     >
       {CATEGORIES.map((category) => (
         <option key={category} value={category}>
-          {category.toUpperCase()}
+          {category}
         </option>
       ))}
     </select>

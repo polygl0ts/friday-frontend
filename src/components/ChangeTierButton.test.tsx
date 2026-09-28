@@ -47,10 +47,10 @@ describe("ChangeTierButton", () => {
   });
 
   it("shows every tag the challenge carries, as the cell always did", () => {
-    renderCell(["tier/bronze", "intro2"]);
+    renderCell(["tier/bronze", "rsa"]);
 
     expect(screen.getByText("tier/bronze")).toBeTruthy();
-    expect(screen.getByText("intro2")).toBeTruthy();
+    expect(screen.getByText("rsa")).toBeTruthy();
   });
 
   it("offers the four known tags rather than a field to type one into", () => {
@@ -58,7 +58,7 @@ describe("ChangeTierButton", () => {
     // so a typo would be a silent 200 that sorts the challenge into no tier.
     openPicker();
 
-    expect(option(/^intro2$/)).toBeTruthy();
+    expect(option(/^juicer$/)).toBeTruthy();
     expect(option(/^tier\/silver$/)).toBeTruthy();
     expect(option(/^tier\/gold$/)).toBeTruthy();
   });
@@ -108,9 +108,9 @@ describe("ChangeTierButton", () => {
     openPicker(null);
 
     // Nothing is the current tag, so nothing is disabled.
-    expect(option(/^intro2$/).hasAttribute("disabled")).toBe(false);
+    expect(option(/^juicer$/).hasAttribute("disabled")).toBe(false);
 
-    fireEvent.click(option(/^intro2$/));
+    fireEvent.click(option(/^juicer$/));
     expect(screen.getByText(/no tag/i)).toBeTruthy();
   });
 });

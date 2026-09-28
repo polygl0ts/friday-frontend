@@ -16,7 +16,7 @@ const ADMIN_TABS: { to: string; label: string; end?: boolean }[] = [
 
 export function AdminLayout() {
   return (
-    <div className="page">
+    <div className="page admin-page">
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <span className="admin-badge">rCTF &middot; CONTROL</span>
       </div>

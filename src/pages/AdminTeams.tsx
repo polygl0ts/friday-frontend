@@ -89,7 +89,7 @@ export function AdminTeams() {
             color: "var(--text-dimmer)",
           }}
         >
-          {total} TOTAL &middot; {bannedCount} BANNED
+          {total} total &middot; {bannedCount} banned
         </span>
       </div>
 

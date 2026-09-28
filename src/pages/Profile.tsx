@@ -1,81 +1,138 @@
 import { Link, useNavigate } from "react-router-dom";
+import { AsciiFrame } from "../components/AsciiFrame";
 import { AvatarPicker } from "../components/AvatarPicker";
 import { MyWriteups } from "../components/MyWriteups";
 import { TeamToken } from "../components/TeamToken";
 import { useAuth } from "../auth/AuthContext";
+import { formatTimestamp } from "../utils";
+
+const BAR_WIDTH = 20;
+
+function bar(n: number, max: number): string {
+  const filled = Math.max(1, Math.round((n / max) * BAR_WIDTH));
+  return "#".repeat(filled) + ".".repeat(BAR_WIDTH - filled);
+}
 
 export function Profile() {
   const { profile, logout } = useAuth();
   const navigate = useNavigate();
+  const solves = profile?.solves ?? [];
 
   const categoryCounts = new Map<string, number>();
-  for (const solve of profile?.solves ?? []) {
+  for (const solve of solves) {
     const cat = solve.category ?? "other";
     categoryCounts.set(cat, (categoryCounts.get(cat) ?? 0) + 1);
   }
   const maxCount = Math.max(1, ...categoryCounts.values());
+  const labelWidth = Math.max(
+    0,
+    ...[...categoryCounts.keys()].map((c) => c.length),
+  );
+  const bloods = solves.filter((s) => s.bloodIndex === 0).length;
+  const log = [...solves].sort(
+    (a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0),
+  );
 
   return (
-    <div className="page">
-      <div style={{ display: "flex", alignItems: "center", gap: 22, border: "1px solid var(--border)", padding: 30, background: "var(--bg-card-alt)" }}>
-        <AvatarPicker url={profile?.avatarUrl ?? null} teamName={profile?.name ?? "your team"} />
-        <div style={{ flex: 1 }}>
-          <div className="heading" style={{ fontSize: 28, color: "var(--text-bright)", fontWeight: 600 }}>
-            {profile?.name ?? "-"}
-          </div>
-          <div className="mono-dim" style={{ marginTop: 6 }}>
-            rank #{profile?.globalPlace ?? "-"} &middot; {profile?.solves.length ?? 0} solves
-          </div>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 34, fontWeight: 800, color: "var(--red)" }}>
-            {profile?.score ?? 0}
-          </div>
-          <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "var(--text-dimmer)" }}>TOTAL POINTS</div>
+    <div className="page profile">
+      <AsciiFrame
+        rank="gold"
+        title={profile?.name ?? "-"}
+        figure={`${profile?.score ?? 0} PTS`}
+        className="profile-id"
+      >
+        <div className="profile-id-body">
+          <AvatarPicker
+            url={profile?.avatarUrl ?? null}
+            teamName={profile?.name ?? "your team"}
+          />
+          <dl className="profile-facts">
+            <dt>rank</dt>
+            <dd>#{profile?.globalPlace ?? "-"}</dd>
+            <dt>solves</dt>
+            <dd>{solves.length}</dd>
+            <dt>first bloods</dt>
+            <dd>{bloods}</dd>
+          </dl>
           <button
-            className="btn btn-outline btn-small"
-            style={{ marginTop: 18 }}
+            className="btn btn-small"
             onClick={() => {
               logout();
               navigate("/login");
             }}
           >
-            LOG OUT
+            log out
           </button>
         </div>
+      </AsciiFrame>
+
+      <div className="grid grid-2 profile-grid">
+        <AsciiFrame rank="silver" title="solves by category">
+          {categoryCounts.size === 0 ? (
+            <div className="mono-dim profile-empty">No solves yet.</div>
+          ) : (
+            <pre className="profile-bars">
+              {[...categoryCounts.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .map(
+                  ([cat, n]) =>
+                    `${cat.padEnd(labelWidth)}  [${bar(n, maxCount)}]  ${n}`,
+                )
+                .join("\n")}
+            </pre>
+          )}
+        </AsciiFrame>
+
+        <AsciiFrame rank="silver" title="my writeups">
+          <div className="profile-writeups">
+            <MyWriteups compact />
+            <Link className="mono-dim" to="/writeups">
+              &#8599; manage them on the writeups page
+            </Link>
+          </div>
+        </AsciiFrame>
       </div>
 
-      {profile?.teamToken && <TeamToken token={profile.teamToken} />}
+      <AsciiFrame rank="silver" title="solve log" className="profile-section">
+        {log.length === 0 ? (
+          <div className="mono-dim profile-empty">Nothing solved yet.</div>
+        ) : (
+          <table className="profile-log">
+            <tbody>
+              {log.map((solve) => (
+                <tr key={solve.id}>
+                  <td className="profile-log-date">
+                    {formatTimestamp(solve.createdAt) ?? "-"}
+                  </td>
+                  <td className="profile-log-cat">
+                    {solve.category ?? "other"}
+                  </td>
+                  <td className="profile-log-name">
+                    {solve.name ?? solve.id}
+                    {solve.bloodIndex === 0 && (
+                      <span className="profile-log-blood" title="first blood">
+                        {" "}
+                        &#129656; first blood
+                      </span>
+                    )}
+                  </td>
+                  <td className="profile-log-points">+{solve.points ?? 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </AsciiFrame>
 
-      <div className="grid grid-2" style={{ marginTop: 24 }}>
-        <div style={{ border: "1px solid var(--border)", background: "var(--bg-card-alt)", padding: 24 }}>
-          <div className="heading" style={{ fontSize: 14, color: "var(--text-bright)", fontWeight: 600, marginBottom: 18 }}>
-            SOLVED BY CATEGORY
-          </div>
-          {categoryCounts.size === 0 && <div className="mono-dim">No solves yet.</div>}
-          {[...categoryCounts.entries()].map(([cat, n]) => (
-            <div key={cat} style={{ marginBottom: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text)", marginBottom: 6 }}>
-                <span>{cat}</span>
-                <span style={{ color: "var(--text-dimmer)" }}>{n}</span>
-              </div>
-              <div className="meter">
-                <div className="meter-fill" style={{ width: `${(n / maxCount) * 100}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="panel" style={{ padding: 20 }}>
-          <div className="heading" style={{ fontSize: 14, color: "var(--text-bright)", marginBottom: 18 }}>
-            MY WRITEUPS
-          </div>
-          <MyWriteups compact />
-          <Link className="mono-dim" to="/writeups" style={{ display: "block", marginTop: 14 }}>
-            &#8599; Manage them on the writeups page
-          </Link>
-        </div>
-      </div>
+      {profile?.teamToken && (
+        <AsciiFrame
+          rank="bronze"
+          title="team token"
+          className="profile-section profile-token"
+        >
+          <TeamToken token={profile.teamToken} />
+        </AsciiFrame>
+      )}
     </div>
   );
 }

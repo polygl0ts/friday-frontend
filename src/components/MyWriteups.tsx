@@ -89,7 +89,7 @@ export function MyWriteups({ compact }: { compact?: boolean }) {
           <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <span className="heading" style={{ fontSize: 17, color: "var(--text-bright)", fontWeight: 600 }}>
-                EDIT <span style={{ color: "var(--red)" }}>&middot; {challengeName(editing.challenge_id)}</span>
+                edit <span style={{ color: "var(--red)" }}>&middot; {challengeName(editing.challenge_id)}</span>
               </span>
               <button className="modal-close" onClick={() => setEditing(null)}>
                 &#10005;

@@ -713,7 +713,7 @@ export interface Leaderboard {
   /**
    * Every *ranked* team, independent of `limit`. Not the same as registered
    * teams - banned teams are excluded, and so is anyone whose only solves are
-   * worth zero points (the whole INTRO2 track). A true registration count
+   * worth zero points. A true registration count
    * lives behind `/v2/admin/users`, which needs `usersWrite`.
    */
   total: number;

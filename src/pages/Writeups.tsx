@@ -13,6 +13,7 @@ import { useStoredTier } from "../hooks/useStoredTier";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { groupByCategory } from "../utils";
 import { PageNote } from "../components/PageNote";
+import { frameRank } from "../components/AsciiFrame";
 
 /** The three tiers browse *other people's* writeups; "mine" is a different
  *  axis entirely, which is why it sits in its own group in the tab bar. */
@@ -143,7 +144,7 @@ export function Writeups() {
               >
                 <div className="category-heading">
                   <span className="category-heading-name">
-                    {group.category.toUpperCase()}
+                    {group.category}
                   </span>
                 </div>
                 <div className="grid grid-3">
@@ -168,6 +169,7 @@ export function Writeups() {
           challengeName={open.name}
           category={open.category}
           canSubmit={open.solved}
+          rank={frameRank(open)}
           onClose={() => setOpen(null)}
         />
       )}

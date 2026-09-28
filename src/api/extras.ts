@@ -1,5 +1,5 @@
 /**
- * Client for the polygl0ts-extras companion API (writeups, INTRO2 (retired),
+ * Client for the polygl0ts-extras companion API (writeups,
  * Discord config, admin stats).
  */
 import { request } from "./client";
@@ -11,7 +11,6 @@ import type {
   DiscordTestResult,
   GradeScores,
   GradingCriteria,
-  Intro2Track,
   Writeup,
   WriteupCard,
   WriteupSort,
@@ -91,9 +90,6 @@ export const gradeWriteup = (id: number, scores: GradeScores) =>
 // /v2/leaderboard/challs, so the grid reads them from rCTF rather than from a
 // cache this service used to poll into a table. See hooks/useChallenges.ts.
 
-/** Every INTRO2 track in one request.*/
-export const getIntro2Tracks = () =>
-  request<Intro2Track[]>(ORIGIN, "/api/intro2/tracks");
 
 export const getAdminStats = () =>
   request<AdminStats>(ORIGIN, "/api/admin/stats");

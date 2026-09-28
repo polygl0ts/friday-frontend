@@ -85,8 +85,8 @@ describe("SolveMatrix", () => {
     renderMatrix();
     await screen.findByText("Baby XOR");
 
-    expect(screen.getByText("CRYPTO").closest("th")?.getAttribute("colspan")).toBe("2");
-    expect(screen.getByText("PWN").closest("th")?.getAttribute("colspan")).toBe("1");
+    expect(screen.getByText("crypto").closest("th")?.getAttribute("colspan")).toBe("2");
+    expect(screen.getByText("pwn").closest("th")?.getAttribute("colspan")).toBe("1");
     // Within crypto, 300 before 100.
     const points = [...document.querySelectorAll(".matrix-points")].map((e) => e.textContent);
     expect(points).toEqual(["300", "100", "200"]);

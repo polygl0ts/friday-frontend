@@ -91,7 +91,7 @@ describe("AdminChallenges", () => {
   it("shows every column the panel exists to show", async () => {
     mockList.mockResolvedValue([
       chall({
-        tags: ["tier/bronze", "intro2"],
+        tags: ["tier/bronze", "rsa"],
         releaseTime: new Date(2026, 0, 2, 3, 4).getTime(),
         hidden: true,
       }),
@@ -107,7 +107,7 @@ describe("AdminChallenges", () => {
     fireEvent.click(flagButtons(line)[0]);
     expect(within(line).getByText("friday{baby_rev}")).toBeTruthy();
     expect(within(line).getByText("tier/bronze")).toBeTruthy();
-    expect(within(line).getByText("intro2")).toBeTruthy();
+    expect(within(line).getByText("rsa")).toBeTruthy();
     expect(within(line).getByText("YES")).toBeTruthy();
     expect(within(line).getByText(/02-01-2026 03:04/)).toBeTruthy();
   });
@@ -126,8 +126,8 @@ describe("AdminChallenges", () => {
 
     expect(await row("staged")).toBeTruthy();
     expect(await row("scheduled")).toBeTruthy();
-    expect(screen.getByText(/3 TOTAL/)).toBeTruthy();
-    expect(screen.getByText(/1 HIDDEN/)).toBeTruthy();
+    expect(screen.getByText(/3 total/)).toBeTruthy();
+    expect(screen.getByText(/1 hidden/)).toBeTruthy();
   });
 
   it("offers the toggle in the HIDDEN cell, pointing the way the row can move", async () => {

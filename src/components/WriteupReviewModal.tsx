@@ -35,7 +35,7 @@ export function WriteupReviewModal({
               {challengeName(writeup.challenge_id)}
             </span>
             <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--red)", marginTop: 6 }}>
-              REVIEW &middot; {writeup.team_name.toUpperCase()}
+              review &middot; {writeup.team_name}
             </div>
           </div>
           <button className="modal-close" onClick={onClose}>
