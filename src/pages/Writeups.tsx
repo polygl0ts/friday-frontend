@@ -9,6 +9,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import { useWriteupCards } from "../hooks/useWriteups";
 import type { Category, ChallengeWithMeta, Tier } from "../types";
+import { useStoredTier } from "../hooks/useStoredTier";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { groupByCategory } from "../utils";
 import { PageNote } from "../components/PageNote";
@@ -21,7 +22,12 @@ const TIERS: Tier[] = ["bronze", "silver", "gold"];
 
 export function Writeups() {
   const { isLoggedIn } = useAuth();
-  const [tier, setTier] = useState<Tab>("bronze");
+  const [storedTier, storeTier] = useStoredTier();
+  const [tier, setTab] = useState<Tab>(storedTier);
+  const setTier = (next: Tab) => {
+    setTab(next);
+    if (next !== "mine") storeTier(next);
+  };
   const [category, setCategory] = useState<Category>("all");
   const [open, setOpen] = useState<ChallengeWithMeta | null>(null);
   const challengesQuery = useChallenges();

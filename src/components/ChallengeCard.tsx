@@ -1,4 +1,5 @@
 import type { ChallengeWithMeta } from "../types";
+import { topicTags, withoutConnectionInfo } from "../utils";
 import { Markdown } from "./Markdown";
 
 export function ChallengeCard({
@@ -10,7 +11,7 @@ export function ChallengeCard({
 }) {
   return (
     <div
-      className={`card chall-card${chall.solved ? " solved" : ""}`}
+      className={`card chall-card rank-${chall.juicer ? "juicer" : (chall.tier ?? "silver")}${chall.solved ? " solved" : ""}`}
       onClick={onOpenDetails}
       style={{ cursor: "pointer" }}
     >
@@ -22,9 +23,11 @@ export function ChallengeCard({
         </span>
       </div>
       <div className="card-stats">
-        <span className={`tag-box${chall.solved ? " accent" : ""}`}>
-          {chall.category.toUpperCase()}
-        </span>
+        {topicTags(chall.tags, chall.category).map((tag) => (
+          <span key={tag} className={`tag-box${chall.solved ? " accent" : ""}`}>
+            {tag}
+          </span>
+        ))}
         <span className="card-stats-end">
           <span className="card-meta" title="solves">
             &#9670;{chall.solveCount}
@@ -39,7 +42,9 @@ export function ChallengeCard({
       </div>
 
       <div className="card-desc compact">
-        <Markdown className="card-desc-markdown">{chall.description}</Markdown>
+        <Markdown className="card-desc-markdown">
+          {withoutConnectionInfo(chall.description)}
+        </Markdown>
       </div>
       <div className="rule rule-bottom" aria-hidden="true">
         <span className="rule-fill" />

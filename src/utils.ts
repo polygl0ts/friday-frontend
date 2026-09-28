@@ -167,6 +167,24 @@ export function archiveFromTags(
 }
 
 /**
+ * The tags worth showing a player: everything but the site's own filing tags
+ * and a tag that just repeats the category.
+ */
+export function topicTags(
+  tags: string[] | null | undefined,
+  category: string,
+): string[] {
+  return (tags ?? []).filter(
+    (tag) =>
+      !tag.startsWith(TIER_TAG_PREFIX) &&
+      !tag.startsWith(ARCHIVE_TAG_PREFIX) &&
+      tag !== JUICER_TAG &&
+      tag !== INTRO2_TAG &&
+      tag.toLowerCase() !== category.toLowerCase(),
+  );
+}
+
+/**
  * rCTF's static flag provider - the only one that stores a literal answer.
  * Everything else (`flags/dynamic`, and the instancer-backed providers)
  * computes per team at submit time, so there is no string to show.
@@ -279,6 +297,14 @@ export function isSafeUrl(url: string | undefined | null): url is string {
 export function resolveFileUrl(url: string, origin: string): string {
   if (/^[a-z][a-z0-9+.-]*:/i.test(url)) return isSafeUrl(url) ? url : "";
   return `${origin.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+/**
+ * A description minus its connection info, which friday-challs' sync appends
+ * as a final paragraph holding a single code span.
+ */
+export function withoutConnectionInfo(description: string): string {
+  return description.replace(/\n\n`[^`\n]+`\s*$/, "");
 }
 
 /** Human-readable attachment size. null means rCTF never recorded one. */

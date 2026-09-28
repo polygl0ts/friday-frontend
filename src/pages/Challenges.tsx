@@ -4,6 +4,7 @@ import { ChallengeModal } from "../components/ChallengeModal";
 import { useAuth } from "../auth/AuthContext";
 import { useChallenges } from "../hooks/useChallenges";
 import type { ChallengeWithMeta, Tier, Category } from "../types";
+import { useStoredTier } from "../hooks/useStoredTier";
 import { DropDownCategory } from "../components/DropDownCategory";
 import { groupByCategory } from "../utils";
 import { PageNote } from "../components/PageNote";
@@ -11,7 +12,7 @@ import { PageNote } from "../components/PageNote";
 const TIERS: Tier[] = ["bronze", "silver", "gold"];
 export function Challenges() {
   const { isLoggedIn } = useAuth();
-  const [tier, setTier] = useState<Tier>("bronze");
+  const [tier, setTier] = useStoredTier();
   const [category, setCategory] = useState<Category>("all");
   const [detailsChallenge, setDetailsChallenge] =
     useState<ChallengeWithMeta | null>(null);

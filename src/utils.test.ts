@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   canWriteChalls,
   formatFileSize,
+  topicTags,
+  withoutConnectionInfo,
   isAdminPerms,
   isCompleteSheet,
   isJuicerFromTag,
@@ -136,6 +138,47 @@ describe("formatFileSize", () => {
   it("returns null when rCTF recorded no size", () => {
     // Files uploaded through v1 have size null - render nothing, not "null".
     expect(formatFileSize(null)).toBeNull();
+  });
+});
+
+describe("topicTags", () => {
+  it("keeps topic tags and drops the site's filing tags", () => {
+    expect(topicTags(["tier/bronze", "rsa", "juicer", "archived/lake25", "intro2", "ecc"], "crypto")).toEqual([
+      "rsa",
+      "ecc",
+    ]);
+  });
+
+  it("drops a tag that repeats the category, whatever its case", () => {
+    expect(topicTags(["crypto", "aes"], "crypto")).toEqual(["aes"]);
+    expect(topicTags(["Pwn"], "pwn")).toEqual([]);
+  });
+
+  it("copes with no tags at all", () => {
+    expect(topicTags(null, "web")).toEqual([]);
+  });
+});
+
+describe("withoutConnectionInfo", () => {
+  it("drops the trailing code-span paragraph the sync appends", () => {
+    expect(withoutConnectionInfo("Pwn the service.\n\n`nc chall.polygl0ts.ch 9001`")).toBe(
+      "Pwn the service.",
+    );
+    expect(withoutConnectionInfo("A blog.\n\n`https://blog.friday-challs.polygl0ts.ch`\n")).toBe(
+      "A blog.",
+    );
+  });
+
+  it("keeps code that is part of the prose", () => {
+    const md = "Run `checksec` first.\n\nThen read the source.";
+    expect(withoutConnectionInfo(md)).toBe(md);
+    expect(withoutConnectionInfo("Hash it:\n\n`sha256sum public.zip` and compare.")).toBe(
+      "Hash it:\n\n`sha256sum public.zip` and compare.",
+    );
+  });
+
+  it("leaves a description without connection info alone", () => {
+    expect(withoutConnectionInfo("Just a description.")).toBe("Just a description.");
   });
 });
 
