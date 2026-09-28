@@ -961,8 +961,12 @@ a.b88-img:hover {
   font-weight: 700;
   color: var(--text-dim);
 }
-.deck-title .deck-link {
-  color: var(--text-bright);
+.deck-title .deck-link,
+.deck-title .deck-link:visited {
+  color: #fff;
+}
+.deck-title .deck-link:hover {
+  color: var(--red);
 }
 .home-frame {
   max-width: 860px;
@@ -1268,7 +1272,8 @@ a.b88-img:hover {
 .chall-card .card-desc-markdown {
   height: calc(3 * 1.5em);
 }
-.ascii-frame.chall-card {
+.ascii-frame.chall-card,
+.ascii-frame.deck-card {
   --frame-fill: #141414;
   /* inset to the middle of the drawn border: top rule, bottom rule, side pipes */
   --fill-top: 12.5px;
@@ -1296,6 +1301,13 @@ a.b88-img:hover {
 .chall-card .tag-box:not(.accent) {
   color: #cbc1c2;
   border-color: #555;
+}
+.ascii-frame.deck-card {
+  --fill-top: 10.5px;
+  --fill-bottom: 10.5px;
+}
+.deck-meta {
+  color: var(--text);
 }
 .ascii-frame.chall-card.rank-juicer {
   --fill-top: 12px;
@@ -1378,6 +1390,7 @@ a.b88-img:hover {
   content: var(--r-fill-bottom, var(--r-fill));
 }
 .rule .card-name {
+  color: #fff;
   flex: 0 1 auto;
   min-width: 0;
   margin: 0;
