@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Slides } from "./Slides";
 import type { Deck } from "../types";
@@ -11,6 +11,8 @@ const getDecks = vi.fn<() => Promise<Deck[]>>();
 vi.mock("../api/slides", () => ({
   getDecks: () => getDecks(),
   deckUrl: (deck: Deck) => `https://slides.example/${deck.file}`,
+  recordingUrl: (deck: Deck) =>
+    deck.recording ? `https://slides.example/${deck.recording}` : undefined,
 }));
 
 function deck(over: Partial<Deck> = {}): Deck {
@@ -67,6 +69,33 @@ describe("Slides", () => {
     await screen.findByText("Second");
     const titles = screen.getAllByText(/^(Second|First)$/).map((el) => el.textContent);
     expect(titles).toEqual(["Second", "First"]);
+  });
+
+  it("has no video button when the deck has no recording", async () => {
+    getDecks.mockResolvedValue([deck()]);
+    renderSlides();
+
+    await screen.findByText("Web 101");
+    expect(screen.queryByRole("button", { name: /video/i })).toBeNull();
+  });
+
+  it("plays the recording inline from the video button", async () => {
+    getDecks.mockResolvedValue([
+      deck({ recording: "decks/2026-09-11-web-101-recording.mp4" }),
+    ]);
+    const { container } = renderSlides();
+
+    const button = await screen.findByRole("button", { name: /video/i });
+    expect(button.closest("a")).toBeNull();
+    expect(container.querySelector("video")).toBeNull();
+
+    fireEvent.click(button);
+    expect(container.querySelector("video")?.getAttribute("src")).toBe(
+      "https://slides.example/decks/2026-09-11-web-101-recording.mp4",
+    );
+
+    fireEvent.click(button);
+    expect(container.querySelector("video")).toBeNull();
   });
 
   it("says so when there are no decks", async () => {

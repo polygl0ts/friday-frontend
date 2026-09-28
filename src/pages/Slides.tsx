@@ -1,17 +1,43 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { deckUrl, getDecks } from "../api/slides";
+import { deckUrl, getDecks, recordingUrl } from "../api/slides";
 import { formatFileSize } from "../utils";
 import type { Deck } from "../types";
 
 const CARD_STYLE = {
-  display: "flex",
-  gap: 14,
-  alignItems: "center",
   border: "1px solid var(--border-dim)",
   borderRadius: 10,
   padding: 14,
   background: "var(--bg-card)",
+} as const;
+
+const ROW_STYLE = {
+  display: "flex",
+  gap: 14,
+  alignItems: "center",
+} as const;
+
+const LINK_STYLE = {
+  ...ROW_STYLE,
+  flex: 1,
+  minWidth: 0,
   textDecoration: "none",
+} as const;
+
+const VIDEO_BUTTON_STYLE = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 4,
+  padding: 0,
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  color: "var(--red)",
+  font: "inherit",
+  fontSize: 10,
+  letterSpacing: 1,
+  textTransform: "uppercase",
 } as const;
 
 const THUMB_STYLE = {
@@ -39,20 +65,47 @@ function DeckCard({ deck }: { deck: Deck }) {
     .filter(Boolean)
     .join(" · ");
 
+  const recording = recordingUrl(deck);
+  const [playing, setPlaying] = useState(false);
+
   return (
-    <a href={deckUrl(deck)} target="_blank" rel="noreferrer" style={CARD_STYLE}>
-      <div style={THUMB_STYLE}>&#9656;</div>
-      <div style={{ minWidth: 0 }}>
-        <div className="heading" style={{ fontSize: 13, color: "var(--text)" }}>
-          {deck.title}
-        </div>
-        <div
-          style={{ fontSize: 11, color: "var(--text-dimmer)", marginTop: 4 }}
-        >
-          {meta}
-        </div>
+    <div style={CARD_STYLE}>
+      <div style={ROW_STYLE}>
+        <a href={deckUrl(deck)} target="_blank" rel="noreferrer" style={LINK_STYLE}>
+          <div style={THUMB_STYLE}>&#9656;</div>
+          <div style={{ minWidth: 0 }}>
+            <div className="heading" style={{ fontSize: 13, color: "var(--text)" }}>
+              {deck.title}
+            </div>
+            <div
+              style={{ fontSize: 11, color: "var(--text-dimmer)", marginTop: 4 }}
+            >
+              {meta}
+            </div>
+          </div>
+        </a>
+        {recording && (
+          <button
+            type="button"
+            style={VIDEO_BUTTON_STYLE}
+            aria-expanded={playing}
+            onClick={() => setPlaying((p) => !p)}
+          >
+            <div style={THUMB_STYLE}>{playing ? "\u25A0" : "\u25B8"}</div>
+            video
+          </button>
+        )}
       </div>
-    </a>
+      {recording && playing && (
+        <video
+          src={recording}
+          controls
+          autoPlay
+          preload="metadata"
+          style={{ display: "block", width: "100%", marginTop: 14 }}
+        />
+      )}
+    </div>
   );
 }
 

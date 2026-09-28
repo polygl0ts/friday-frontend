@@ -355,6 +355,7 @@ export interface Deck {
   file: string;
   pages: number;
   size_bytes: number;
+  recording?: string;
 }
 
 /** The single writeup-lifecycle webhook. First bloods are announced by rCTF's
