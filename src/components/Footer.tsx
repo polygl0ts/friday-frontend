@@ -76,6 +76,11 @@ const IMAGES: { src: string; title: string; href?: string }[] = [
   { src: "crushit.gif", title: "lets crush capitalism" },
   { src: "nocookie.gif", title: "100% cookie free" },
   { src: "antinft.gif", title: "anti-NFT site" },
+  {
+    src: "aurea.png",
+    href: "https://thenet.sk/",
+    title: "organizers/aurea"
+  },
 ];
 
 export function Footer() {
