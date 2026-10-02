@@ -36,6 +36,10 @@ const IMAGES: { src: string; title: string; href?: string }[] = [
     title: "made with vi",
   },
   {
+    src: "torrents.gif",
+    title: "torrent the decompilers",
+  },
+  {
     src: "datakrash_buttongenerator.gif",
     href: "https://88x31.datakra.sh/",
     title: "neat button generator, used for one button here",
