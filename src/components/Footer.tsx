@@ -11,13 +11,6 @@ type Button = {
 
 const BUTTONS: Button[] = [
   {
-    href: "https://polygl0ts.ch/",
-    title: "polygl0ts",
-    icon: "logo",
-    lines: ["POLYGL0TS", "EPFL CTF"],
-    tone: "red",
-  },
-  {
     href: "https://discord.gg/7Zx4FZyTSP",
     title: "join our discord",
     icon: "#",
@@ -49,6 +42,11 @@ const BUTTONS: Button[] = [
 
 /** Classic buttons from the cyber.dabamos.de/88x31 archive, served from public/88x31. */
 const IMAGES: { src: string; title: string; href?: string }[] = [
+  {
+    src: "polygl0ts.gif",
+    href: "https://polygl0ts.ch/",
+    title: "polygl0ts",
+  },
   {
     src: "hackerpowered.gif",
     href: "https://polygl0ts.ch/",
