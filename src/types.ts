@@ -358,6 +358,18 @@ export interface Deck {
   recording?: string;
 }
 
+/** One club event. Not `Event`: that name is the DOM's. */
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  /** ISO 8601, always with an offset. */
+  starts_at: string;
+  location: string;
+  description: string;
+}
+
+export type CalendarEventIn = Omit<CalendarEvent, "id">;
+
 /** The single writeup-lifecycle webhook. First bloods are announced by rCTF's
  *  own blood bot, configured in rCTF's config file - not here. */
 export interface DiscordConfig {

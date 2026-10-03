@@ -9,6 +9,7 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/writeups", label: "writeups" },
   { to: "/archived", label: "archived" },
   { to: "/slides", label: "slides" },
+  { to: "/calendar", label: "calendar" },
   { to: "/scoreboard", label: "scoreboard" },
 ];
 

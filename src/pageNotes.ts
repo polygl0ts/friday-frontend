@@ -4,6 +4,7 @@ export const PAGE_NOTES = {
   juicers: "The hardest challenges taken from past CTFs. Rotated every third monday.",
   writeups: "Writeups by polygl0ts members!",
   archived: "All challenges we ever authored.",
+  calendar: "What's coming up at polygl0ts.",
   slides: "Material from our lectures, see https://github.com/polylg0lts/slides .",
 } as const;
 

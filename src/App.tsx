@@ -7,6 +7,7 @@ import { Admin } from "./pages/Admin";
 import { AdminChallenges } from "./pages/AdminChallenges";
 import { AdminTeams } from "./pages/AdminTeams";
 import { ArchivedChalls } from "./pages/ArchivedChalls";
+import { Calendar } from "./pages/Calendar";
 import { Challenges } from "./pages/Challenges";
 import { Juicers } from "./pages/JuicerChallenges";
 import { Home } from "./pages/Home";
@@ -29,6 +30,7 @@ function App() {
             <Route path="/writeups" element={<Writeups />} />
             <Route path="/archived" element={<ArchivedChalls />} />
             <Route path="/slides" element={<Slides />} />
+            <Route path="/calendar" element={<Calendar />} />
             <Route path="/scoreboard" element={<Scoreboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/verify" element={<Verify />} />
