@@ -6,8 +6,6 @@ import { request } from "./client";
 import { extrasOrigin as ORIGIN } from "../config";
 import type {
   AdminStats,
-  CalendarEvent,
-  CalendarEventIn,
   DiscordConfig,
   DiscordConfigUpdate,
   DiscordTestResult,
@@ -91,17 +89,6 @@ export const gradeWriteup = (id: number, scores: GradeScores) =>
 // First bloods are deliberately absent here: rCTF v2 serves them itself on
 // /v2/leaderboard/challs, so the grid reads them from rCTF rather than from a
 // cache this service used to poll into a table. See hooks/useChallenges.ts.
-
-export const getEvents = () => request<CalendarEvent[]>(ORIGIN, "/api/events");
-
-export const createEvent = (event: CalendarEventIn) =>
-  request<CalendarEvent>(ORIGIN, "/api/events", {
-    method: "POST",
-    body: event,
-  });
-
-export const deleteEvent = (id: number) =>
-  request<void>(ORIGIN, `/api/events/${id}`, { method: "DELETE" });
 
 export const getAdminStats = () =>
   request<AdminStats>(ORIGIN, "/api/admin/stats");

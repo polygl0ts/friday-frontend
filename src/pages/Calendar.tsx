@@ -1,176 +1,89 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createEvent, deleteEvent, getEvents } from "../api/extras";
-import { useAuth } from "../auth/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getEvents } from "../api/calendar";
+import { CALENDAR_FEED_PATH } from "../calendarFeed";
+import { toEventIcs } from "../ics";
 import { AsciiFrame } from "../components/AsciiFrame";
-import { ConfirmDialog } from "../components/ConfirmDialog";
 import { PageNote } from "../components/PageNote";
 import type { CalendarEvent } from "../types";
-import { formatTimestamp, fromDatetimeLocal, toDatetimeLocal } from "../utils";
+import { formatTimestamp, toDatetimeLocal } from "../utils";
 
-function formatEventTime(ms: number) {
-  return `${formatTimestamp(ms)} ${toDatetimeLocal(ms).slice(11)}`;
+/**
+ * When the event happens, in the viewer's timezone.
+ *
+ * All-day ranges use the last inclusive day. The feed's end is exclusive, so
+ * a Thursday-to-Saturday block is stored as ending Sunday midnight.
+ */
+function formatEventWhen(event: CalendarEvent): string {
+  const startDate = formatTimestamp(event.starts_at);
+  if (!startDate) return "";
+
+  if (event.all_day) {
+    const endDate = formatTimestamp(inclusiveAllDayEnd(event.ends_at));
+    if (endDate && endDate !== startDate) return `${startDate} - ${endDate}`;
+    return startDate;
+  }
+
+  const start = `${startDate} ${toDatetimeLocal(event.starts_at).slice(11)}`;
+  if (event.ends_at == null) return start;
+  const endDate = formatTimestamp(event.ends_at);
+  const endTime = toDatetimeLocal(event.ends_at).slice(11);
+  if (!endDate || endDate === startDate) return `${start} - ${endTime}`;
+  return `${start} - ${endDate} ${endTime}`;
+}
+
+/** Local midnight of the last day an all-day event covers, or null. */
+function inclusiveAllDayEnd(endsAt: number | null): number | null {
+  if (endsAt == null) return null;
+  const end = new Date(endsAt);
+  return new Date(end.getFullYear(), end.getMonth(), end.getDate() - 1).getTime();
+}
+
+/** When the event is over. A missing all-day end means a single day. */
+function eventFinish(event: CalendarEvent): number {
+  if (event.ends_at != null) return event.ends_at;
+  if (event.all_day) {
+    const start = new Date(event.starts_at);
+    return new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1).getTime();
+  }
+  return event.starts_at;
 }
 
 /**
  * One event row. Laid out like a deck card, so it reuses the deck styles.
+ * Same treatment as a challenge card: bright title, dim date line, body text.
  */
-function EventCard({ event }: { event: CalendarEvent }) {
-  const queryClient = useQueryClient();
-  const { isAdmin } = useAuth();
-  const [confirming, setConfirming] = useState(false);
-  const mutation = useMutation({
-    mutationFn: () => deleteEvent(event.id),
-    onSuccess: () => setConfirming(false),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["events"] }),
-  });
+/** Save this one event as a file the visitor's calendar app can import. */
+function downloadEvent(event: CalendarEvent) {
+  const blob = new Blob([toEventIcs(event)], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  const name = event.title.replace(/[\\/:*?"<>|]+/g, "").trim() || "event";
+  link.download = `${name}.ics`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
-  const meta = [formatEventTime(Date.parse(event.starts_at)), event.location]
-    .filter(Boolean)
-    .join(" · ");
+function EventCard({ event }: { event: CalendarEvent }) {
+  const meta = [formatEventWhen(event), event.location].filter(Boolean).join(" · ");
 
   return (
-    <AsciiFrame rank="deck" className="deck-card">
+    <AsciiFrame rank="deck" className="deck-card calendar-event">
       <div className="deck-title">
         {"{ "}
         {event.title}
         {" }"}
       </div>
       <div className="deck-row">
-        <span className="deck-meta">{meta}</span>
-        {isAdmin && (
-          <span className="deck-actions">
-            <button
-              type="button"
-              className="btn btn-small"
-              disabled={mutation.isPending}
-              onClick={() => setConfirming(true)}
-            >
-              delete
-            </button>
-          </span>
-        )}
+        <span className="calendar-when">{meta}</span>
+        <span className="deck-actions">
+          <button type="button" className="btn btn-small" onClick={() => downloadEvent(event)}>
+            add to calendar
+          </button>
+        </span>
       </div>
-      {event.description && (
-        <div
-          className="deck-meta"
-          style={{ marginTop: 8, whiteSpace: "pre-wrap" }}
-        >
-          {event.description}
-        </div>
-      )}
-
-      {confirming && (
-        <ConfirmDialog
-          title="Delete this event?"
-          confirmLabel={mutation.isPending ? "DELETING..." : "DELETE"}
-          cancelLabel="KEEP IT"
-          pending={mutation.isPending}
-          error={mutation.error ? (mutation.error as Error).message : null}
-          onConfirm={() => mutation.mutate()}
-          onCancel={() => {
-            mutation.reset();
-            setConfirming(false);
-          }}
-        >
-          <span style={{ color: "var(--text-bright)" }}>{event.title}</span>{" "}
-          comes off the calendar for everyone. There is no undo - add it again
-          to bring it back.
-        </ConfirmDialog>
-      )}
+      {event.description && <div className="calendar-desc">{event.description}</div>}
     </AsciiFrame>
-  );
-}
-
-function AddEventForm() {
-  const queryClient = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [when, setWhen] = useState("");
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const startsAt = fromDatetimeLocal(when);
-
-  const mutation = useMutation({
-    mutationFn: () =>
-      createEvent({
-        title: title.trim(),
-        starts_at: new Date(startsAt!).toISOString(),
-        location: location.trim(),
-        description: description.trim(),
-      }),
-    onSuccess: () => {
-      setTitle("");
-      setWhen("");
-      setLocation("");
-      setDescription("");
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-    },
-  });
-
-  return (
-    <form
-      style={{ marginTop: 30, maxWidth: 760 }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        mutation.mutate();
-      }}
-    >
-      <div className="field">
-        <label className="field-label" htmlFor="event-title">
-          title
-        </label>
-        <input
-          id="event-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
-      <div className="field">
-        <label className="field-label" htmlFor="event-when">
-          date &amp; time (your timezone)
-        </label>
-        <input
-          id="event-when"
-          type="datetime-local"
-          className="schedule-input"
-          value={when}
-          onChange={(e) => setWhen(e.target.value)}
-        />
-      </div>
-      <div className="field">
-        <label className="field-label" htmlFor="event-location">
-          location
-        </label>
-        <input
-          id="event-location"
-          value={location}
-          placeholder="optional"
-          onChange={(e) => setLocation(e.target.value)}
-        />
-      </div>
-      <div className="field">
-        <label className="field-label" htmlFor="event-description">
-          description
-        </label>
-        <textarea
-          id="event-description"
-          value={description}
-          placeholder="optional"
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-
-      {mutation.error && (
-        <div className="error-text">{(mutation.error as Error).message}</div>
-      )}
-      <button
-        type="submit"
-        className="btn btn-primary"
-        disabled={!title.trim() || startsAt === null || mutation.isPending}
-      >
-        {mutation.isPending ? "ADDING..." : "ADD EVENT"}
-      </button>
-    </form>
   );
 }
 
@@ -184,19 +97,28 @@ const LIST_STYLE = {
 
 /** Public on purpose, like the slides: it's what we show people before they join. */
 export function Calendar() {
-  const { isAdmin } = useAuth();
-  const eventsQuery = useQuery({ queryKey: ["events"], queryFn: getEvents });
+  const eventsQuery = useQuery({
+    queryKey: ["events"],
+    queryFn: getEvents,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const today = new Date().setHours(0, 0, 0, 0);
+  const now = Date.now();
   const events = eventsQuery.data ?? [];
-  const upcoming = events.filter((e) => Date.parse(e.starts_at) >= today);
-  const past = events.filter((e) => Date.parse(e.starts_at) < today).reverse();
+  const upcoming = events
+    .filter((event) => eventFinish(event) > now)
+    .sort((a, b) => a.starts_at - b.starts_at);
+  const past = events
+    .filter((event) => eventFinish(event) <= now)
+    .sort((a, b) => b.starts_at - a.starts_at);
 
   return (
     <div className="page">
       <PageNote page="calendar" />
 
-      {isAdmin && <AddEventForm />}
+      <a className="btn btn-small calendar-ics" href={CALENDAR_FEED_PATH} download="polygl0ts.ics">
+        get ics
+      </a>
 
       {eventsQuery.isLoading && <div className="loading">Loading...</div>}
       {eventsQuery.error && (
