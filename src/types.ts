@@ -358,17 +358,22 @@ export interface Deck {
   recording?: string;
 }
 
-/** One club event. Not `Event`: that name is the DOM's. */
+/** One club event, parsed from the public calendar feed. Not `Event`: that
+ *  name is the DOM's. */
 export interface CalendarEvent {
-  id: number;
+  /** The feed's `UID`. */
+  id: string;
   title: string;
-  /** ISO 8601, always with an offset. */
-  starts_at: string;
+  /** Unix milliseconds. Local midnight of the first day when `all_day`. */
+  starts_at: number;
+  /** Unix milliseconds, exclusive. Null when the feed gives no end. */
+  ends_at: number | null;
+  all_day: boolean;
   location: string;
   description: string;
+  /** Names from the feed's `CATEGORIES`, in the order they were listed. */
+  categories: string[];
 }
-
-export type CalendarEventIn = Omit<CalendarEvent, "id">;
 
 /** The single writeup-lifecycle webhook. First bloods are announced by rCTF's
  *  own blood bot, configured in rCTF's config file - not here. */

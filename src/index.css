@@ -879,6 +879,23 @@ a.b88-img:hover {
   font-weight: 700;
   color: var(--text-dim);
 }
+.calendar-ics {
+  margin-top: 18px;
+}
+.calendar-event .deck-title {
+  color: var(--text-bright);
+}
+.calendar-when {
+  font-size: 12px;
+  color: var(--text-dimmer);
+}
+.calendar-desc {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
 .deck-title .deck-link,
 .deck-title .deck-link:visited {
   color: #fff;
