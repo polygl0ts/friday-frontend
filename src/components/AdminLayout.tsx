@@ -12,6 +12,7 @@ const ADMIN_TABS: { to: string; label: string; end?: boolean }[] = [
   { to: "/admin", label: "OVERVIEW", end: true },
   { to: "/admin/challs", label: "CHALLENGES" },
   { to: "/admin/teams", label: "TEAMS" },
+  { to: "/admin/invites", label: "INVITES" },
 ];
 
 export function AdminLayout() {

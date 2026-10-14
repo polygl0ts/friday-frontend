@@ -55,6 +55,6 @@ describe("AdminLayout", () => {
     const hrefs = [...document.querySelectorAll<HTMLAnchorElement>(".admin-tabs a")].map(
       (a) => a.getAttribute("href"),
     );
-    expect(hrefs).toEqual(["/admin", "/admin/challs", "/admin/teams"]);
+    expect(hrefs).toEqual(["/admin", "/admin/challs", "/admin/teams", "/admin/invites"]);
   });
 });

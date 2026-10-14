@@ -396,3 +396,23 @@ export interface AdminStats {
   submissions: number;
   pending_writeups: number;
 }
+
+// ---------- Lake Quals invitations ----------
+
+export type InviteStatus = "pending" | "accepted" | "rejected";
+
+/** One team in the invitation chain, as the admin panel sees it. */
+export interface Invite {
+  id: number;
+  team_name: string;
+  email: string;
+  status: InviteStatus;
+  token: string | null;
+  revoked: boolean;
+  invited_by_id: number | null;
+  /** "LakeOrga" for a root team. */
+  invited_by: string;
+  created_at: string;
+  decided_by: string | null;
+  decided_at: string | null;
+}

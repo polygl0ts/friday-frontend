@@ -5,11 +5,13 @@ import { Header } from "./components/Header";
 import { RequireAdmin } from "./components/RequireAdmin";
 import { Admin } from "./pages/Admin";
 import { AdminChallenges } from "./pages/AdminChallenges";
+import { AdminInvites } from "./pages/AdminInvites";
 import { AdminTeams } from "./pages/AdminTeams";
 import { ArchivedChalls } from "./pages/ArchivedChalls";
 import { Calendar } from "./pages/Calendar";
 import { Challenges } from "./pages/Challenges";
 import { Juicers } from "./pages/JuicerChallenges";
+import { LakeQuals } from "./pages/LakeQuals";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
@@ -36,6 +38,7 @@ function App() {
             <Route path="/verify" element={<Verify />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/juicers" element={<Juicers />} />
+            <Route path="/lake-quals" element={<LakeQuals />} />
             <Route
               path="/admin"
               element={
@@ -47,6 +50,7 @@ function App() {
               <Route index element={<Admin />} />
               <Route path="challs" element={<AdminChallenges />} />
               <Route path="teams" element={<AdminTeams />} />
+              <Route path="invites" element={<AdminInvites />} />
             </Route>
           </Routes>
         </main>

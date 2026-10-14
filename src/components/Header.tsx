@@ -11,6 +11,7 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/slides", label: "slides" },
   { to: "/calendar", label: "calendar" },
   { to: "/scoreboard", label: "scoreboard" },
+  { to: "/lake-quals", label: "lake quals" },
 ];
 
 const LOGO = String.raw`              __          _____  __

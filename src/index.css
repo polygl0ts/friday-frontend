@@ -49,7 +49,9 @@
   --me-bg: #1f080c;
 
   --glow: 0 0 6px rgba(255, 42, 61, 0.65);
-  --backdrop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' shape-rendering='crispEdges'%3E%3Cg fill='%23fff'%3E%3Crect x='7' y='12' width='1' height='1' opacity='.7'/%3E%3Crect x='61' y='5' width='1' height='1' opacity='.4'/%3E%3Crect x='38' y='41' width='2' height='2' opacity='.8'/%3E%3Crect x='83' y='30' width='1' height='1' opacity='.6'/%3E%3Crect x='19' y='70' width='1' height='1' opacity='.5'/%3E%3Crect x='70' y='78' width='1' height='1' opacity='.8'/%3E%3Crect x='52' y='90' width='1' height='1' opacity='.35'/%3E%3C/g%3E%3Cg fill='%23ff2a3d'%3E%3Crect x='89' y='60' width='1' height='1' opacity='.9'/%3E%3Crect x='27' y='27' width='1' height='1' opacity='.6'/%3E%3Cpath d='M9 50h1v1H9zM8 51h3v1H8zM9 52h1v1H9z' opacity='.8'/%3E%3C/g%3E%3C/svg%3E"), radial-gradient(ellipse at top, #1a0509, #000 70%);
+  --backdrop:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' shape-rendering='crispEdges'%3E%3Cg fill='%23fff'%3E%3Crect x='7' y='12' width='1' height='1' opacity='.7'/%3E%3Crect x='61' y='5' width='1' height='1' opacity='.4'/%3E%3Crect x='38' y='41' width='2' height='2' opacity='.8'/%3E%3Crect x='83' y='30' width='1' height='1' opacity='.6'/%3E%3Crect x='19' y='70' width='1' height='1' opacity='.5'/%3E%3Crect x='70' y='78' width='1' height='1' opacity='.8'/%3E%3Crect x='52' y='90' width='1' height='1' opacity='.35'/%3E%3C/g%3E%3Cg fill='%23ff2a3d'%3E%3Crect x='89' y='60' width='1' height='1' opacity='.9'/%3E%3Crect x='27' y='27' width='1' height='1' opacity='.6'/%3E%3Cpath d='M9 50h1v1H9zM8 51h3v1H8zM9 52h1v1H9z' opacity='.8'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse at top, #1a0509, #000 70%);
   --backdrop-size: 96px 96px, 100% 100%;
 
   --shadow-edge: 6px 6px 0 rgba(0, 0, 0, 0.75);
@@ -1215,8 +1217,8 @@ a.b88-img:hover {
   --fill-bottom: 10.5px;
   --fill-side: 4px;
   background: linear-gradient(var(--frame-fill), var(--frame-fill)) no-repeat
-    var(--fill-side) var(--fill-top) /
-    calc(100% - 2 * var(--fill-side)) calc(100% - var(--fill-top) - var(--fill-bottom));
+    var(--fill-side) var(--fill-top) / calc(100% - 2 * var(--fill-side))
+    calc(100% - var(--fill-top) - var(--fill-bottom));
 }
 .chall-card .card-desc.compact {
   color: #cbc1c2;
@@ -1264,8 +1266,9 @@ a.b88-img:hover {
 .rule,
 .rule .card-points::before,
 .rule .card-points::after {
-  font-family: "Courier New", Menlo, Consolas, "DejaVu Sans Mono",
-    "Liberation Mono", monospace;
+  font-family:
+    "Courier New", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono",
+    monospace;
   font-size: 13px;
 }
 .rule {
@@ -1557,7 +1560,6 @@ a.b88-img:hover {
   border-bottom: none;
 }
 
-
 /* ---------- table (scoreboard) ---------- */
 
 .table {
@@ -1641,8 +1643,25 @@ a.b88-img:hover {
   }
 }
 
+.table-row.table-invites {
+  grid-template-columns:
+    minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 0.55fr) minmax(0, 1fr)
+    minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 0.45fr) minmax(0, 1.5fr);
+  gap: 14px;
+  align-items: center;
+}
+@media (max-width: 1200px) {
+  .table:has(.table-invites) {
+    overflow-x: auto;
+  }
+  .table-row.table-invites {
+    min-width: 1080px;
+  }
+}
+
 .table-row.table-challs.table-head,
 .table-row.table-teams.table-head,
+.table-row.table-invites.table-head,
 .table-row.table-subs.table-head {
   background: var(--subhead-bg);
   color: var(--subhead-fg);
@@ -3404,7 +3423,16 @@ textarea.md-editor:focus {
   border-color: var(--border-dim);
   color: var(--text-dim);
 }
-.admin-page :is(.hide-challenge, .ban-team, .change-tag, .change-score, .change-division, .release-challenge, .view-submissions) {
+.admin-page
+  :is(
+    .hide-challenge,
+    .ban-team,
+    .change-tag,
+    .change-score,
+    .change-division,
+    .release-challenge,
+    .view-submissions
+  ) {
   border-color: var(--border-dim);
   text-transform: lowercase;
   letter-spacing: 0.02em;

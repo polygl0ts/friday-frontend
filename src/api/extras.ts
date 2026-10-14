@@ -1,6 +1,6 @@
 /**
  * Client for the polygl0ts-extras companion API (writeups,
- * Discord config, admin stats).
+ * Discord config, admin stats, Lake Quals invitations).
  */
 import { request } from "./client";
 import { extrasOrigin as ORIGIN } from "../config";
@@ -11,6 +11,7 @@ import type {
   DiscordTestResult,
   GradeScores,
   GradingCriteria,
+  Invite,
   Writeup,
   WriteupCard,
   WriteupSort,
@@ -113,5 +114,44 @@ export const clearWebhook = () =>
  *  themselves are fire-and-forget. */
 export const testDiscordWebhook = () =>
   request<DiscordTestResult>(ORIGIN, "/api/admin/discord-config/test", {
+    method: "POST",
+  });
+
+// Lake Quals invitations. Auth is done using the quals token, independant of rCTF.
+
+export const inviteWhoami = (token: string) =>
+  request<{ team_name: string }>(
+    ORIGIN,
+    `/api/invites/whoami?token=${encodeURIComponent(token)}`,
+    { auth: false },
+  );
+
+export const submitInvite = (token: string, teamName: string, email: string) =>
+  request<void>(ORIGIN, "/api/invites", {
+    method: "POST",
+    body: { token, team_name: teamName, email },
+    auth: false,
+  });
+
+export const getInvites = () => request<Invite[]>(ORIGIN, "/api/admin/invites");
+
+export const createRootInvite = (teamName: string, email: string) =>
+  request<Invite>(ORIGIN, "/api/admin/invites", {
+    method: "POST",
+    body: { team_name: teamName, email },
+  });
+
+export const acceptInvite = (id: number) =>
+  request<Invite>(ORIGIN, `/api/admin/invites/${id}/accept`, {
+    method: "POST",
+  });
+
+export const rejectInvite = (id: number) =>
+  request<Invite>(ORIGIN, `/api/admin/invites/${id}/reject`, {
+    method: "POST",
+  });
+
+export const revokeInvite = (id: number) =>
+  request<Invite>(ORIGIN, `/api/admin/invites/${id}/revoke`, {
     method: "POST",
   });
