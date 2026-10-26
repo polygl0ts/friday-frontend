@@ -66,6 +66,11 @@ const IMAGES: { src: string; title: string; href?: string }[] = [
     href: "https://thenet.sk/",
     title: "organizers/aurea"
   },
+  {
+    src: "zelda.gif",
+    href: "https://zelda.li/",
+    title: "organizers/zelda"
+  },
 ];
 
 export function Footer() {
