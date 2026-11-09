@@ -5,7 +5,7 @@ export const PAGE_NOTES = {
   writeups: "Writeups by polygl0ts members!",
   archived: "All challenges we ever authored.",
   calendar: "What's coming up at polygl0ts.",
-  slides: "Material from our lectures, see https://github.com/polylg0lts/slides .",
+  slides: "Material from our lectures, see https://github.com/polygl0ts/slides .",
 } as const;
 
 export type PageNoteKey = keyof typeof PAGE_NOTES;
